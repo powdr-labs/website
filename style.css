@@ -19,10 +19,9 @@ a {
   color: #555;
 }
 .wall {
-  height: calc(100vh - 130px);
+  min-height: calc(100vh - 130px);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   position: relative;
   max-width: 1200px;
@@ -31,6 +30,7 @@ a {
 }
 .wall-main {
   width: 100%;
+  padding-top: 20vh;
   position: relative;
   text-align: center;
   margin-bottom: 15vh;
@@ -60,13 +60,10 @@ a {
 }
 .footer {
   display: flex;
-  gap: 40px;
-  justify-content: center;
-  align-items: center;
+  justify-content: space-evenly;
   height: 80px;
+  margin-top: 80px;
   padding: 25px;
-  padding-left: 140px;
-  padding-right: 140px;
   background-color: #222;
   color: #fff;
 }
@@ -75,13 +72,6 @@ a {
 }
 
 @media screen and (max-width: 1023px) {
-  .body {
-    padding-top: 60px;
-  }
-  .wall {
-    height: calc(100vh - 60px);
-    overflow: hidden;
-  }
   .footer {
     padding-left: 10px;
     padding-right: 10px;
