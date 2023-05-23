@@ -19,7 +19,7 @@ a {
   color: #555;
 }
 .wall {
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -59,6 +59,10 @@ a {
   text-align: left;
 }
 .footer {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: center;
   height: 80px;
   padding: 25px;
   padding-left: 140px;
@@ -68,7 +72,7 @@ a {
 }
 .footer a {
   color: #fff;
-}  
+}
 
 @media screen and (max-width: 1023px) {
   .body {
@@ -77,6 +81,10 @@ a {
   .wall {
     height: calc(100vh - 60px);
     overflow: hidden;
+  }
+  .footer {
+    padding-left: 10px;
+    padding-right: 10px;
   }
 }
 @-moz-keyframes flyIn {
