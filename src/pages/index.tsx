@@ -71,7 +71,7 @@ export default function Index() {
                 fontSize={{ sm: "16px", md: "24px" }}
                 fontWeight="light"
               >
-                Design a new zkVM in hours, through a user-defined ISA which
+                Design a new zkVM in hours, through a user-defined ISA, which
                 powdr compiles into a zkVM.
               </Text>
               <Text
