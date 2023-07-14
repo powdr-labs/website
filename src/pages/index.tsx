@@ -18,13 +18,13 @@ export default function Index() {
   return (
     <>
       <Head>
-        <title>Powdr - A zkVM toolkit</title>
+        <title>powdr - A zkVM toolkit</title>
         <meta
           name="description"
-          content="Powdr brings modularity, flexibility, security and excellent developer experience to zkVMs"
+          content="powdr brings modularity, flexibility, security and excellent developer experience to zkVMs"
         />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Powdr - A zkVM toolkit" />
+        <meta property="og:title" content="powdr - A zkVM toolkit" />
         <meta
           property="og:description"
           content="Powdr brings modularity, flexibility, security and excellent developer experience to zkVMs"
@@ -46,21 +46,24 @@ export default function Index() {
                 fontWeight="light"
               >
                 Powdr brings modularity, flexibility, security and excellent
-                developper experience to zkVMs.
+                developer experience to zkVMs.
               </Text>
-              <Button
-                py="24px"
+              <Link
+                href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median"
+                target="_blank"
+                p="16px"
                 borderRadius="full"
                 bg="accent"
                 fontFamily="heading"
+                fontWeight="bold"
                 fontSize={{ sm: "16px", md: "18px" }}
                 _hover={{ shadow: "lg" }}
               >
                 Check out our examples
-              </Button>
+              </Link>
             </VStack>
             <VStack gap="32px" my="24px">
-              <Heading>How it works</Heading>
+              <Heading textAlign="center">How it works</Heading>
               <Text
                 maxW="650px"
                 align="center"
@@ -69,7 +72,7 @@ export default function Index() {
                 fontWeight="light"
               >
                 Design a new zkVM in hours, through a user-defined ISA, which
-                Powdr compiles into a zkVM.
+                powdr compiles into a zkVM.
               </Text>
               <Text
                 maxW="650px"
@@ -84,7 +87,7 @@ export default function Index() {
               <Image src="/vector-art2.svg" alt="Vector art" />
             </VStack>
             <VStack gap="32px" mb="24px" w={"100%"}>
-              <Heading>Want to see more?</Heading>
+              <Heading textAlign="center">Want to see more?</Heading>
               <Flex
                 flexWrap="wrap"
                 h="314px"
@@ -93,43 +96,100 @@ export default function Index() {
                 fontFamily="heading"
               >
                 <Link
+                  position="relative"
                   display="flex"
-                  href="https://github.com/powdr-org"
+                  href="https://github.com/powdr-labs"
                   target="_blank"
                   flex="1"
                   flexDirection="column"
                   justifyContent="center"
                   alignItems="center"
-                  gap="2"
                   borderRadius="3xl"
                   borderColor="dark"
                   border="1px"
                   minW="200px"
-                  _hover={{ textTransform: "none" }}
+                  _before={{
+                    opacity: 0,
+                    position: "absolute",
+                    content: `""`,
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "3xl",
+                    background:
+                      "linear-gradient(50deg, rgba(66, 141, 255, 1) 0%, rgba(66, 221, 255, 1) 50%, rgba(255, 155, 239, 1) 100%)",
+                    transition: "0.33s",
+                    zIndex: 0,
+                  }}
+                  _hover={{
+                    shadow: "lg",
+                    textTransform: "none",
+                    border: "none",
+                    _before: { opacity: 1 },
+                  }}
                 >
-                  <BsGithub size="72px" />
-                  <Text fontWeight="bold" fontSize={{ sm: "16px", md: "24px" }}>
-                    Check our Github
-                  </Text>
+                  <Flex
+                    zIndex={1}
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    gap="2"
+                  >
+                    <BsGithub size="72px" />
+                    <Text
+                      fontWeight="bold"
+                      fontSize={{ sm: "16px", md: "24px" }}
+                    >
+                      Check our Github
+                    </Text>
+                  </Flex>
                 </Link>
                 <Link
+                  position="relative"
                   display="flex"
                   href="mailto:info@powdr.org"
+                  target="_blank"
                   flex="1"
-                  flexDirection={"column"}
+                  flexDirection="column"
                   justifyContent="center"
                   alignItems="center"
-                  gap="2"
                   borderRadius="3xl"
                   borderColor="dark"
                   border="1px"
                   minW="200px"
-                  _hover={{ textTransform: "none" }}
+                  _before={{
+                    opacity: 0,
+                    position: "absolute",
+                    content: `""`,
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "3xl",
+                    background:
+                      "linear-gradient(50deg, rgba(66, 141, 255, 1) 0%, rgba(66, 221, 255, 1) 50%, rgba(255, 155, 239, 1) 100%)",
+                    transition: "0.33s",
+                    zIndex: 0,
+                  }}
+                  _hover={{
+                    shadow: "lg",
+                    textTransform: "none",
+                    border: "none",
+                    _before: { opacity: 1 },
+                  }}
                 >
-                  <HiOutlineEnvelope size="72px" />
-                  <Text fontWeight="bold" fontSize={{ sm: "16px", md: "24px" }}>
-                    Contact us by email
-                  </Text>
+                  <Flex
+                    zIndex={1}
+                    flexDirection="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    gap="2"
+                  >
+                    <HiOutlineEnvelope size="72px" />
+                    <Text
+                      fontWeight="bold"
+                      fontSize={{ sm: "16px", md: "24px" }}
+                    >
+                      Contact us by email
+                    </Text>
+                  </Flex>
                 </Link>
               </Flex>
             </VStack>
