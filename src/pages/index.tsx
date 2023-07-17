@@ -146,7 +146,7 @@ export default function Index() {
                 <Link
                   position="relative"
                   display="flex"
-                  href="mailto:info@powdr.org"
+                  href="mailto:info@powdrlabs.com"
                   target="_blank"
                   flex="1"
                   flexDirection="column"
