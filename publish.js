@@ -1,7 +1,9 @@
-const ghpages = require("gh-pages");
-const fs = require("fs");
+// This script can be used for manual publishing
 
-fs.openSync("out/.nojekyll", "w");
+// $ npm run build
+// $ node publish.js
+
+const ghpages = require("gh-pages");
 
 ghpages.publish("out", { dotfiles: true });
 console.log("Published");
