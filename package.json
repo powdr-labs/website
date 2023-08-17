@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next export",
+    "postbuild": "cp CNAME out/CNAME && touch out/.nojekyll",
     "start": "next start",
-    "lint": "next lint",
-    "deploy": "next build && next export && cp CNAME out/CNAME && node publish.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.7.0",
