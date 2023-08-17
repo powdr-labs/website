@@ -53,7 +53,7 @@ export default function Index() {
                 justifyContent="center"
                 alignItems="center"
                 w="100%"
-                gap="10"
+                gap="4"
               >
                 <Link
                   href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median"
@@ -73,7 +73,7 @@ export default function Index() {
                   target="_blank"
                   p="16px"
                   borderRadius="full"
-                  bg="accent"
+                  bg="gray.200"
                   fontFamily="heading"
                   fontWeight="bold"
                   fontSize={{ sm: "16px", md: "18px" }}
