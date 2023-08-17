@@ -48,19 +48,40 @@ export default function Index() {
                 Powdr brings modularity, flexibility, security and excellent
                 developer experience to zkVMs.
               </Text>
-              <Link
-                href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median"
-                target="_blank"
-                p="16px"
-                borderRadius="full"
-                bg="accent"
-                fontFamily="heading"
-                fontWeight="bold"
-                fontSize={{ sm: "16px", md: "18px" }}
-                _hover={{ shadow: "lg" }}
+              <Flex
+                flexWrap="wrap"
+                justifyContent="center"
+                alignItems="center"
+                w="100%"
+                gap="10"
               >
-                Check out our examples
-              </Link>
+                <Link
+                  href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median"
+                  target="_blank"
+                  p="16px"
+                  borderRadius="full"
+                  bg="accent"
+                  fontFamily="heading"
+                  fontWeight="bold"
+                  fontSize={{ sm: "16px", md: "18px" }}
+                  _hover={{ shadow: "lg" }}
+                >
+                  Check out our examples
+                </Link>
+                <Link
+                  href="https://docs.powdr.org"
+                  target="_blank"
+                  p="16px"
+                  borderRadius="full"
+                  bg="accent"
+                  fontFamily="heading"
+                  fontWeight="bold"
+                  fontSize={{ sm: "16px", md: "18px" }}
+                  _hover={{ shadow: "lg" }}
+                >
+                  Read our docs
+                </Link>
+              </Flex>
             </VStack>
             <VStack gap="32px" my="24px">
               <Heading textAlign="center">How it works</Heading>
