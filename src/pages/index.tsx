@@ -229,7 +229,8 @@ export default function Index() {
           <Logotype color="light" height="75px" />
           <Flex gap="4" fontFamily="heading" fontSize="16px">
             <Text>Powdr-2023</Text>
-            <Link href="#">Legals</Link>
+            <Link href="/impressum">Impressum</Link>
+            <Link href="/privacy-policy">Privacy Policy</Link>
           </Flex>
         </Flex>
       </Flex>
