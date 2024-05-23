@@ -1,6 +1,8 @@
 import { Flex, Link, Text } from "@chakra-ui/react";
 import { Logotype } from "./Logotype";
 
+let currentYear = new Date().getFullYear();
+
 function Footer() {
   return (
     <Flex as="footer" bg="dark" mt="24px" h="300px">
@@ -15,8 +17,8 @@ function Footer() {
         <Link href="/">
             <Logotype color="light" height="75px" />
         </Link>
+        <Text fontFamily="heading" fontSize="16px">© powdr labs GmbH 2023-{currentYear}. All Rights Reserved.</Text>
         <Flex gap="4" fontFamily="heading" fontSize="16px">
-          <Text>Powdr-2023</Text>
           <Link href="/impressum">Impressum</Link>
           <Link href="/privacy-policy">Privacy Policy</Link>
         </Flex>
