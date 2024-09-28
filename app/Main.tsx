@@ -4,6 +4,8 @@ import siteMetadata from '@/data/siteMetadata'
 import { formatDate } from 'pliny/utils/formatDate'
 import NewsletterForm from 'pliny/ui/NewsletterForm'
 import { PowdrLogo } from '@/components/powdrLogo'
+import Image from 'next/image'
+import SocialIcon from '@/components/social-icons'
 
 const MAX_DISPLAY = 5
 
@@ -11,79 +13,80 @@ export default function Home({ posts }) {
   return (
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
-        <div className="space-y-2 pb-8 pt-6 md:space-y-5">
-          <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
-            {siteMetadata.description}
+        <div className="mt-12 flex flex-col items-center justify-center">
+          <Image src="/static/images/vector-art1.svg" alt="Powdr" width={600} height={600} />
+          <p className="mt-8 text-center text-2xl">
+            Powdr brings modularity, flexibility, security and excellent developer experience to
+            zkVMs.
           </p>
+          <div className="mt-8 flex space-x-4">
+            <Link
+              href="/examples"
+              className="rounded-full bg-pink-400 px-6 py-3 text-lg font-semibold text-white hover:bg-pink-500"
+            >
+              Check out our examples
+            </Link>
+            <Link
+              href="/docs"
+              className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-gray-800 hover:bg-blue-300"
+            >
+              Read our docs
+            </Link>
+          </div>
+
+          {/*  "How it works" section */}
+          <div className="mt-16 flex flex-col items-center justify-center">
+            <h2 className="mb-8 text-3xl font-bold">How it works</h2>
+            <Image src="/static/images/vector-art2.svg" alt="Vector art" width={981} height={348} />
+            <div className="mt-8 max-w-2xl text-center">
+              <p className="mb-4">
+                Design a new zkVM in hours, through a user-defined ISA, which powdr compiles into a
+                zkVM.
+              </p>
+              <p>Generate proofs using eSTARK, Halo2, Nova, and whatever comes next.</p>
+            </div>
+          </div>
+
+          {/* "Want to see more?" section */}
+          <div className="mt-16 flex flex-col items-center justify-center">
+            <h2 className="mb-8 text-3xl font-bold">Want to see more?</h2>
+            <div className="flex space-x-8">
+              <Link
+                href={siteMetadata.github}
+                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg"
+              >
+                <div
+                  className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background:
+                      'linear-gradient(50deg, rgba(66, 141, 255, 1) 0%, rgba(66, 221, 255, 1) 50%, rgba(255, 155, 239, 1) 100%)',
+                  }}
+                ></div>
+                <div className="z-10 flex flex-col items-center justify-center">
+                  <SocialIcon kind="github" href={siteMetadata.github} size={8} />
+                  <p className="mt-4 text-lg font-semibold">Check our Github</p>
+                </div>
+              </Link>
+              <Link
+                href={`mailto:${siteMetadata.email}`}
+                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg"
+              >
+                <div
+                  className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    background:
+                      'linear-gradient(50deg, rgba(66, 141, 255, 1) 0%, rgba(66, 221, 255, 1) 50%, rgba(255, 155, 239, 1) 100%)',
+                  }}
+                ></div>
+                <div className="z-10 flex flex-col items-center justify-center">
+                  <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} size={8} />
+                  <p className="mt-4 text-lg font-semibold">Contact us by email</p>
+                </div>
+              </Link>
+            </div>
+          </div>
         </div>
-        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!posts.length && 'No posts found.'}
-          {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post
-            return (
-              <li key={slug} className="py-12">
-                <article>
-                  <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
-                    <dl>
-                      <dt className="sr-only">Published on</dt>
-                      <dd className="text-base font-medium leading-6 text-gray-500 dark:text-gray-400">
-                        <time dateTime={date}>{formatDate(date, siteMetadata.locale)}</time>
-                      </dd>
-                    </dl>
-                    <div className="space-y-5 xl:col-span-3">
-                      <div className="space-y-6">
-                        <div>
-                          <h2 className="text-2xl font-bold leading-8 tracking-tight">
-                            <Link
-                              href={`/blog/${slug}`}
-                              className="text-gray-900 dark:text-gray-100"
-                            >
-                              {title}
-                            </Link>
-                          </h2>
-                          <div className="flex flex-wrap">
-                            {tags.map((tag) => (
-                              <Tag key={tag} text={tag} />
-                            ))}
-                          </div>
-                        </div>
-                        <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                          {summary}
-                        </div>
-                      </div>
-                      <div className="text-base font-medium leading-6">
-                        <Link
-                          href={`/blog/${slug}`}
-                          className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-                          aria-label={`Read more: "${title}"`}
-                        >
-                          Read more &rarr;
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              </li>
-            )
-          })}
-        </ul>
       </div>
-      {posts.length > MAX_DISPLAY && (
-        <div className="flex justify-end text-base font-medium leading-6">
-          <Link
-            href="/blog"
-            className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-            aria-label="All posts"
-          >
-            All Posts &rarr;
-          </Link>
-        </div>
-      )}
-      {siteMetadata.newsletter?.provider && (
-        <div className="flex items-center justify-center pt-4">
-          <NewsletterForm />
-        </div>
-      )}
     </>
   )
 }
