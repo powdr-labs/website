@@ -8,18 +8,24 @@ export default function Home({ posts }) {
     <>
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="mt-12 flex flex-col items-center justify-center">
-          <Image src="/static/images/vector-art1.svg" alt="Powdr" width={600} height={600} />
-          <p className="mt-8 text-center font-mono text-2xl font-light">
+          <Image
+            src="/static/images/vector-art1.svg"
+            alt="Powdr"
+            width={600}
+            height={600}
+            className="py-8"
+          />
+          <p className="mt-8 text-center font-mono text-lg font-light md:text-2xl">
             Powdr brings modularity, flexibility, security and excellent developer experience to
             zkVMs.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/examples">
-              <div className="bg-primary rounded-full px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:shadow-lg">
+            <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
+              <div className="rounded-full bg-primary px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:shadow-lg">
                 Check out our examples
               </div>
             </Link>
-            <Link href="/docs">
+            <Link href="https://docs.powdr.org/">
               <div className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-gray-800 transition-all duration-300 hover:shadow-lg">
                 Read our docs
               </div>
@@ -27,10 +33,10 @@ export default function Home({ posts }) {
           </div>
 
           {/*  "How it works" section */}
-          <div className="mt-16 flex flex-col items-center justify-center">
+          <div className="mt-16 flex flex-col items-center justify-center py-12">
             <h2 className="mb-8 text-3xl font-bold">How it works</h2>
             <Image src="/static/images/vector-art2.svg" alt="Vector art" width={981} height={348} />
-            <div className="mt-8 max-w-2xl text-center font-mono text-xl font-light">
+            <div className="mt-8 max-w-2xl text-center font-mono text-base font-light md:text-lg">
               <p className="mb-4">
                 Design a new zkVM in hours, through a user-defined ISA, which powdr compiles into a
                 zkVM.
@@ -40,7 +46,7 @@ export default function Home({ posts }) {
           </div>
 
           {/* "Want to see more?" section */}
-          <div className="mt-16 flex flex-col items-center justify-center">
+          <div className="mt-16 flex flex-col items-center justify-center py-12">
             <h2 className="mb-8 text-3xl font-bold">Want to see more?</h2>
             <div className="flex space-x-8">
               <Link
