@@ -1,32 +1,22 @@
 import Link from './Link'
-import siteMetadata from '@/data/siteMetadata'
-import SocialIcon from '@/components/social-icons'
+import { PowdrLogo } from './powdrLogo'
 
 export default function Footer() {
   return (
-    <footer>
-      <div className="mt-16 flex flex-col items-center">
-        <div className="mb-3 flex space-x-4">
-          <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} size={6} />
-          <SocialIcon kind="github" href={siteMetadata.github} size={6} />
-          <SocialIcon kind="facebook" href={siteMetadata.facebook} size={6} />
-          <SocialIcon kind="youtube" href={siteMetadata.youtube} size={6} />
-          <SocialIcon kind="linkedin" href={siteMetadata.linkedin} size={6} />
-          <SocialIcon kind="twitter" href={siteMetadata.twitter} size={6} />
-          <SocialIcon kind="x" href={siteMetadata.x} size={6} />
-          <SocialIcon kind="instagram" href={siteMetadata.instagram} size={6} />
-          <SocialIcon kind="threads" href={siteMetadata.threads} size={6} />
-        </div>
-        <div className="mb-2 flex space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <div>{siteMetadata.author}</div>
-          <div>{` • `}</div>
-          <div>{`© ${new Date().getFullYear()}`}</div>
-          <div>{` • `}</div>
-          <Link href="/">{siteMetadata.title}</Link>
-        </div>
-        <div className="mb-8 text-sm text-gray-500 dark:text-gray-400">
-          <Link href="https://github.com/timlrx/tailwind-nextjs-starter-blog">
-            Tailwind Nextjs Theme
+    <footer className="mt-12 bg-[#1e1b4b] py-8 text-white">
+      <div className="container mx-auto flex flex-col items-center">
+        <PowdrLogo className="mb-4 h-24 w-auto text-white" />
+        <p className="mb-2 text-sm">
+          © powdr labs GmbH {new Date().getFullYear()}-{new Date().getFullYear() + 1}. All Rights
+          Reserved.
+        </p>
+        <div className="text-sm">
+          <Link href="/impressum" className="hover:underline">
+            Impressum
+          </Link>
+          <span className="mx-2">|</span>
+          <Link href="/privacy-policy" className="hover:underline">
+            Privacy Policy
           </Link>
         </div>
       </div>

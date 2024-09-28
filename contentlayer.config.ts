@@ -143,9 +143,22 @@ export const Authors = defineDocumentType(() => ({
   computedFields,
 }))
 
+export const PrivacyPolicy = defineDocumentType(() => ({
+  name: 'PrivacyPolicy',
+  filePathPattern: 'privacy-policy/**/*.mdx',
+  contentType: 'mdx',
+  fields: {
+    title: { type: 'string', required: true },
+    date: { type: 'date', required: true },
+  },
+  computedFields: {
+    ...computedFields,
+  },
+}))
+
 export default makeSource({
   contentDirPath: 'data',
-  documentTypes: [Blog, Authors],
+  documentTypes: [Blog, Authors, PrivacyPolicy], // Add PrivacyPolicy here
   mdx: {
     cwd: process.cwd(),
     remarkPlugins: [
