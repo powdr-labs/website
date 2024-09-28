@@ -22,10 +22,24 @@ module.exports = {
         14: '3.5rem',
       },
       fontFamily: {
-        sans: ['var(--font-space-grotesk)', ...fontFamily.sans],
+        sans: ['var(--font-poppins)', ...fontFamily.sans],
+        mono: ['var(--font-noto-sans-mono)', ...fontFamily.mono],
       },
       colors: {
-        primary: colors.pink,
+        primary: {
+          DEFAULT: '#FF9BEF',
+          50: '#FFFFFF',
+          100: '#FFFFFF',
+          200: '#FFFFFF',
+          300: '#FFEDFC',
+          400: '#FFC4F6',
+          500: '#FF9BEF',
+          600: '#FF63E6',
+          700: '#FF2BDD',
+          800: '#F200CB',
+          900: '#BA009C',
+          950: '#9E0084',
+        },
         gray: colors.gray,
       },
       zIndex: {
