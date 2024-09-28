@@ -1,13 +1,7 @@
 import Link from '@/components/Link'
-import Tag from '@/components/Tag'
 import siteMetadata from '@/data/siteMetadata'
-import { formatDate } from 'pliny/utils/formatDate'
-import NewsletterForm from 'pliny/ui/NewsletterForm'
-import { PowdrLogo } from '@/components/powdrLogo'
 import Image from 'next/image'
-import SocialIcon from '@/components/social-icons'
-
-const MAX_DISPLAY = 5
+import { Github, Mail } from '@/components/social-icons/icons'
 
 export default function Home({ posts }) {
   return (
@@ -20,17 +14,15 @@ export default function Home({ posts }) {
             zkVMs.
           </p>
           <div className="mt-8 flex space-x-4">
-            <Link
-              href="/examples"
-              className="rounded-full bg-pink-400 px-6 py-3 text-lg font-semibold text-white hover:bg-pink-500"
-            >
-              Check out our examples
+            <Link href="/examples">
+              <div className="rounded-full bg-pink-400 px-6 py-3 text-lg font-semibold text-white hover:bg-pink-500">
+                Check out our examples
+              </div>
             </Link>
-            <Link
-              href="/docs"
-              className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-gray-800 hover:bg-blue-300"
-            >
-              Read our docs
+            <Link href="/docs">
+              <div className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-gray-800 hover:bg-blue-300">
+                Read our docs
+              </div>
             </Link>
           </div>
 
@@ -63,7 +55,7 @@ export default function Home({ posts }) {
                   }}
                 ></div>
                 <div className="z-10 flex flex-col items-center justify-center">
-                  <SocialIcon kind="github" href={siteMetadata.github} size={8} />
+                  <Github className="h-8 w-8 fill-current text-gray-700" />
                   <p className="mt-4 text-lg font-semibold">Check our Github</p>
                 </div>
               </Link>
@@ -79,7 +71,7 @@ export default function Home({ posts }) {
                   }}
                 ></div>
                 <div className="z-10 flex flex-col items-center justify-center">
-                  <SocialIcon kind="mail" href={`mailto:${siteMetadata.email}`} size={8} />
+                  <Mail className="h-8 w-8 fill-current text-gray-700" />
                   <p className="mt-4 text-lg font-semibold">Contact us by email</p>
                 </div>
               </Link>
