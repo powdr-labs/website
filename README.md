@@ -32,6 +32,14 @@ Run:
 $ EXPORT=1 UNOPTIMIZED=1 yarn build
 ```
 
+If you're facing Prettier issues on build, run
+
+```
+yarn prettier --write .
+```
+
+and build after that.
+
 ## License
 
 [MIT](LICENSE)

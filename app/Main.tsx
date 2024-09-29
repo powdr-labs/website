@@ -28,12 +28,12 @@ export default function Home({ posts }) {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
-              <div className="bg-primary rounded-full px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:bg-primary-400">
+              <div className="rounded-full bg-primary px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:bg-primary-400">
                 Check out our examples
               </div>
             </Link>
             <Link href="https://docs.powdr.org/">
-              <div className="bg-secondary text-secondary-950 hover:bg-secondary-300 rounded-full px-6 py-3 text-lg font-semibold transition-all duration-300">
+              <div className="rounded-full bg-secondary px-6 py-3 text-lg font-semibold text-secondary-950 transition-all duration-300 hover:bg-secondary-300">
                 Read our docs
               </div>
             </Link>
