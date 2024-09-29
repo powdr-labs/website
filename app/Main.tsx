@@ -21,7 +21,7 @@ export default function Home({ posts }) {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
-              <div className="rounded-full bg-primary px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:shadow-lg">
+              <div className="bg-primary rounded-full px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:shadow-lg">
                 Check out our examples
               </div>
             </Link>
@@ -48,7 +48,7 @@ export default function Home({ posts }) {
           {/* "Want to see more?" section */}
           <div className="mt-16 flex flex-col items-center justify-center py-12">
             <h2 className="mb-8 text-3xl font-bold">Want to see more?</h2>
-            <div className="flex space-x-8">
+            <div className="flex flex-wrap justify-center gap-6">
               <Link
                 href={siteMetadata.github}
                 className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg"
