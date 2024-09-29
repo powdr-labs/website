@@ -3,7 +3,7 @@ import { PowdrLogo } from './powdrLogo'
 
 export default function Footer() {
   return (
-    <footer className="mt-12 bg-[#1e1b4b] py-8 text-white">
+    <footer className="mt-auto bg-[#1e1b4b] py-8 text-white">
       <div className="container mx-auto flex flex-col items-center">
         <PowdrLogo className="mb-4 h-24 w-auto text-white" />
         <p className="mb-2 text-sm">
