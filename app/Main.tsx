@@ -13,7 +13,14 @@ export default function Home({ posts }) {
             alt="Powdr"
             width={600}
             height={600}
-            className="py-8"
+            className="object-contain py-8 dark:hidden"
+          />
+          <Image
+            src="/static/images/vector-art1-dark.svg"
+            alt="Powdr"
+            width={600}
+            height={600}
+            className="hidden object-contain py-8 dark:block"
           />
           <p className="mt-8 text-center font-mono text-lg font-light md:text-2xl">
             Powdr brings modularity, flexibility, security and excellent developer experience to
@@ -21,12 +28,12 @@ export default function Home({ posts }) {
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
-              <div className="bg-primary rounded-full px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:shadow-lg">
+              <div className="bg-primary rounded-full px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:bg-primary-400">
                 Check out our examples
               </div>
             </Link>
             <Link href="https://docs.powdr.org/">
-              <div className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-blue-800 transition-all duration-300 hover:shadow-lg">
+              <div className="bg-secondary text-secondary-950 hover:bg-secondary-300 rounded-full px-6 py-3 text-lg font-semibold transition-all duration-300">
                 Read our docs
               </div>
             </Link>
@@ -35,7 +42,20 @@ export default function Home({ posts }) {
           {/*  "How it works" section */}
           <div className="mt-16 flex flex-col items-center justify-center py-12">
             <h2 className="mb-8 text-3xl font-bold">How it works</h2>
-            <Image src="/static/images/vector-art2.svg" alt="Vector art" width={981} height={348} />
+            <Image
+              src="/static/images/vector-art2.svg"
+              alt="Vector art"
+              width={981}
+              height={348}
+              className="dark:hidden"
+            />
+            <Image
+              src="/static/images/vector-art2-dark.svg"
+              alt="Vector art"
+              width={981}
+              height={348}
+              className="hidden dark:block"
+            />
             <div className="mt-8 max-w-2xl text-center font-mono text-base font-light md:text-lg">
               <p className="mb-4">
                 Design a new zkVM in hours, through a user-defined ISA, which powdr compiles into a
@@ -51,7 +71,7 @@ export default function Home({ posts }) {
             <div className="flex flex-wrap justify-center gap-6">
               <Link
                 href={siteMetadata.github}
-                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg"
+                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg dark:hover:text-gray-700"
               >
                 <div
                   className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -61,13 +81,13 @@ export default function Home({ posts }) {
                   }}
                 ></div>
                 <div className="z-10 flex flex-col items-center justify-center">
-                  <Github className="h-8 w-8 fill-current text-gray-700" />
+                  <Github className="h-8 w-8 fill-current" />
                   <p className="mt-4 text-lg font-semibold">Check our Github</p>
                 </div>
               </Link>
               <Link
                 href={`mailto:${siteMetadata.email}`}
-                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg"
+                className="group relative flex h-48 w-64 flex-col items-center justify-center rounded-3xl border border-gray-300 transition-all duration-300 hover:border-transparent hover:shadow-lg dark:hover:text-gray-700"
               >
                 <div
                   className="absolute inset-0 rounded-3xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
@@ -77,7 +97,7 @@ export default function Home({ posts }) {
                   }}
                 ></div>
                 <div className="z-10 flex flex-col items-center justify-center">
-                  <Mail className="h-8 w-8 fill-current text-gray-700" />
+                  <Mail className="h-8 w-8 fill-current" />
                   <p className="mt-4 text-lg font-semibold">Contact us by email</p>
                 </div>
               </Link>
