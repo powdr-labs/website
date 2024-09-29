@@ -26,7 +26,7 @@ export default function Home({ posts }) {
               </div>
             </Link>
             <Link href="https://docs.powdr.org/">
-              <div className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-gray-800 transition-all duration-300 hover:shadow-lg">
+              <div className="rounded-full bg-blue-200 px-6 py-3 text-lg font-semibold text-blue-800 transition-all duration-300 hover:shadow-lg">
                 Read our docs
               </div>
             </Link>
