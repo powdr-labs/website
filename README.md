@@ -32,8 +32,8 @@ Run:
 $ EXPORT=1 UNOPTIMIZED=1 yarn build
 ```
 
-## Licence
+## License
 
-[MIT](https://github.com/powdr-labs/website/LICENSE)
+[MIT](LICENSE)
 
 Based on [tailwind-nextjs-starter-blog](https://github.com/timlrx/tailwind-nextjs-starter-blog)
