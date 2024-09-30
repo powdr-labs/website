@@ -100,15 +100,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-white pl-[calc(100vw-100%)] text-black antialiased dark:bg-gray-950 dark:text-white">
         <ThemeProviders>
           {/* <Analytics analyticsConfig={siteMetadata.analytics as AnalyticsConfig} /> */}
-          <div className="flex min-h-screen flex-col">
-            <SectionContainer>
-              <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
-                <Header />
-                <main className="mb-12 flex-grow">{children}</main>
-              </SearchProvider>
-            </SectionContainer>
-            <Footer />
-          </div>
+          <SectionContainer>
+            <SearchProvider searchConfig={siteMetadata.search as SearchConfig}>
+              <Header />
+              <main className="mb-12 flex-grow">{children}</main>
+            </SearchProvider>
+          </SectionContainer>
+          <Footer />
         </ThemeProviders>
       </body>
     </html>

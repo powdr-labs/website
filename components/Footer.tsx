@@ -3,8 +3,8 @@ import { PowdrLogo } from './powdrLogo'
 
 export default function Footer() {
   return (
-    <footer className="mt-auto bg-[#1e1b4b] py-8 text-white">
-      <div className="container mx-auto flex flex-col items-center">
+    <footer className="mt-auto bg-[#1e1b4b] px-8 py-8 text-white">
+      <div className="container mx-auto flex flex-col items-center text-center">
         <PowdrLogo className="mb-4 h-24 w-auto text-white" />
         <p className="mb-2 text-sm">
           © powdr labs GmbH {new Date().getFullYear()}-{new Date().getFullYear() + 1}. All Rights
