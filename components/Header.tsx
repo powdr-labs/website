@@ -32,8 +32,8 @@ const Header = () => {
             ))}
         </div>
         <SearchButton />
-        <ThemeSwitch />
         <MobileNav />
+        <ThemeSwitch />
       </div>
     </header>
   )
