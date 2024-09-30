@@ -1,9 +1,9 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'powdr - a zkVM toolkit',
-  author: 'Powdr Labs',
+  title: 'powdr - an SDK for ZK proofs',
+  author: 'powdr labs',
   headerTitle: 'powdr',
-  description: 'powrdr - A zkVM toolkit',
+  description: 'powdr - an SDK for ZK proofs',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://www.powdr.org/',
