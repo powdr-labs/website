@@ -29,11 +29,9 @@ export default function PostMinimal({ content, next, prev, children }: LayoutPro
         <div>
           <div className="space-y-1 pb-10 text-center dark:border-gray-700">
             <div className="w-full">
-              <Bleed>
-                <div className="relative aspect-[2/1] w-full">
-                  <Image src={displayImage} alt={title} fill className="object-cover" />
-                </div>
-              </Bleed>
+              <div className="relative mx-auto aspect-[2/1] w-full max-w-3xl">
+                <Image src={displayImage} alt={title} fill className="object-cover" />
+              </div>
             </div>
             <div className="relative pt-10">
               <PageTitle>{title}</PageTitle>
