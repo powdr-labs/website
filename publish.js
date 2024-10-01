@@ -3,7 +3,7 @@
 // $ npm run build
 // $ node publish.js
 
-const ghpages = require("gh-pages");
+const ghpages = require('gh-pages')
 
-ghpages.publish("out", { dotfiles: true });
-console.log("Published");
+ghpages.publish('out', { dotfiles: true })
+console.log('Published')

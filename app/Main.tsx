@@ -23,8 +23,8 @@ export default function Home({ posts }) {
             className="hidden object-contain py-8 dark:block"
           />
           <p className="mt-8 text-center font-mono text-lg font-light md:text-2xl">
-            Powdr brings modularity, flexibility, security and excellent developer experience to
-            zkVMs.
+            powdr makes ZK applications future-proof by providing modular, flexible, and upgradeable
+            tooling
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
@@ -58,10 +58,12 @@ export default function Home({ posts }) {
             />
             <div className="mt-8 max-w-2xl text-center font-mono text-base font-light md:text-lg">
               <p className="mb-4">
-                Design a new zkVM in hours, through a user-defined ISA, which powdr compiles into a
-                zkVM.
+                create and configure ZK solutions in hours, powered by powdr's flexible compiler
               </p>
-              <p>Generate proofs using eSTARK, Halo2, Nova, and whatever comes next.</p>
+              <p>
+                seamlessly integrate and upgrade to the latest proving systems like Halo2, Plonky3,
+                eSTARK, GKR and future innovations — without rewriting code
+              </p>
             </div>
           </div>
 
