@@ -1,0 +1,65 @@
+---
+title: 'powdrVM: A Multi-Prover, Future-Proof zkVM'
+date: '2024-10-30'
+summary: 'Announcing the release of powdrVM 0.1, a significant milestone in our journey to build a future-proof, high-performance zkVM.'
+layout: PostBanner
+images: ['/static/images/powdrvm.png']
+---
+
+Today, we are thrilled to announce the release of
+[powdrVM 0.1](https://github.com/powdr-labs/powdr/releases/tag/v0.1.0),
+a significant milestone in our journey to build a future-proof, high-performance zkVM.
+
+powdrVM brings a new level of flexibility and innovation to zkVMs, providing multi-prover compatibility,
+modularity, and an adaptable foundation that can grow with advancements in ZK technology.
+Built on the [powdr SDK](https://github.com/powdr-labs/powdr),
+powdrVM is ready to support developers today while paving the way for resilient,
+long-lasting applications in decentralized technology and beyond.
+
+## Key Features of powdrVM
+
+### Full Rust Compatibility
+powdrVM offers support for standard Rust, helping developers bring their projects into the zkVM world with minimal overhead.
+Get started with [the docs](https://docs.powdr.org/) and check out some [example projects](https://github.com/powdr-labs/powdr/tree/main/examples).
+
+powdrVM implements zk-continuations, enabling proofs to span across longer or unbounded computational processes.
+This approach allows developers to generate proofs for more complex applications without being limited by the execution size.
+
+### Multi-Prover Support
+powdrVM is the first zkVM with multi-prover support. Developers can leverage several leading ZK proof systems, including:
+- [Plonky3](https://github.com/Plonky3/Plonky3)
+- [Halo2](https://github.com/privacy-scaling-explorations/halo2)
+- [Polygon PIL STARK](https://github.com/0xPolygonHermez/pil-stark)
+- [Eigen Labs’ Starky](https://github.com/0xEigenLabs/eigen-zkvm/tree/main/starky)
+
+This diversity of prover support gives developers more flexibility to experiment and adapt their projects as ZK research progresses.
+
+### Powered by [powdr](https://github.com/powdr-labs/powdr)
+powdrVM is built on top of the [powdr SDK](https://github.com/powdr-labs/powdr), leveraging a modular and extensible platform.
+This architecture allows new research and optimizations to be added seamlessly without requiring changes to the core VM.
+With this approach, powdrVM is future-proof, built to adapt as the ZK research landscape evolves.
+
+### State-of-the-art Proving Performance
+powdrVM’s performance is already comparable to production zkVMs. Initial benchmarks on base VM performance indicate strong results,
+even before full recursion and precompile support are integrated.
+With these features underway, we’ll soon share a comprehensive benchmark report to showcase powdrVM’s capabilities in detail.
+
+## What's Next?
+We're just getting started, and several exciting developments are on the horizon:
+- Field Optimizations: Expanded support for fields like BabyBear, KoalaBear, and Mersenne31.
+- Precompiles: Optimized precompiles to improve performance.
+- Recursion: Proof aggregation and compression through recursion.
+- Stwo Integration: Integration with Starkware's fast [Stwo prover](https://github.com/starkware-libs/stwo/) to enhance zkVM efficiency.
+- Collaborative GKR Research: Ongoing work on GKR, pushing the limits of zkVM performance.
+
+## Get Started with powdrVM
+
+Ready to dive in? We’ve made it easy to get started with powdrVM. Here’s what you’ll find in our documentation and resources:
+- [Quickstart Guide](https://docs.powdr.org/powdr_vm_intro.html): Follow our step-by-step guide to run your first proof.
+- [Developer Documentation](https://docs.powdr.org/installation_sdk.html): Detailed explanations of powdrVM’s components, multi-prover setup, and modular architecture.
+- [Examples and Templates](https://github.com/powdr-labs/powdr/tree/main/examples): Explore example projects and templates to kickstart your own application with powdrVM.
+
+powdrVM is fully open source and built in the open, from day 1. For those interested in contributing or learning more, we encourage you to reach out to the team on [Matrix](https://matrix.to/#/#powdr:matrix.org) or [Github](https://github.com/powdr-labs/powdr).
+
+Join our release party on October 31st at 3pm UTC to meet the team and discuss powdrVM!
+The link will be shared shortly before on our [twitter account](https://twitter.com/powdr_labs).
