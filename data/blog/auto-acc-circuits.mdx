@@ -1,0 +1,232 @@
+---
+title: 'Automatic Circuit Acceleration of Guest Programs'
+date: '2025-01-22'
+summary: "In this article we will go through powdr's latest research and experimental feature: automatic generation of circuits to accelerate guest programs."
+---
+
+In this article we will go through powdr's latest research and experimental feature: automatic generation of circuits to accelerate guest programs.
+
+tl;dr:
+
+- powdr can now generate efficient circuits to accelerate any powdr-asm input program.
+- The feature is ISA-independent.
+- powdrVM applies this feature to Rust programs.
+- Costly Rust blocks are transformed into circuits.
+- The compiler automatically decides which blocks to accelerate.
+- The analysis is performed both statically and at runtime.
+- **New accelerated circuits (aka precompiles) are automatically generated and optimized.**
+- **Preliminary experiments show up to 10x gains in VM cycle count and potential proof time reduction.**
+- Future steps: further optimizations, powdrVM full integration, benchmarks.
+
+## Circuits vs zkVMs
+
+There have been many recent discussions on whether production teams will use zkVMs or custom circuits, with some of the arguments being:
+
+- zkVMs provide great UX/DX and enable efficient code re-use and minimal prototyping speed, but are prohibitively expensive for client-side proofs and require third-parties for proof generation.
+- ZK circuits can still provide orders of magnitude better performance and work well with local proofs, but require expert engineering that doesn't scale.
+
+While the answer is far from clear, general purpose zkVMs already make heavy use of accelerated circuits (aka precompiles) to replace computationally expensive procedures that are computed via software in guest programs, such as hash functions and elliptic curve operations.
+
+However, these circuits have the same disadvantages as "traditional" ZK circuits, made even worse by the lack of tooling and libraries that zkDSLs provide:
+
+- They require a custom implementation, often tightly connected to the zkVM and a single proof system.
+- The implementation is complex and demands expert knowledge.
+- Witness generation code effectively doubles the code base.
+- It is hard to predict what and when to accelerate.
+
+## Compile, Optimize, Profit
+
+Among the current main general purpose zkVMs, there is a clear clustering of the compiler-based (powdrVM, Valida, zkLLVM) and the VM-based (Risc0, SP1, Jolt, OpenVM) ones.
+
+While the compiler approach may introduce more implementation work, it also gives direct access to techniques that may be infeasible or hard to reach otherwise. For example, Valida provides a custom LLVM backend which compiles guest programs directly to a more efficient and ZK-friendly ISA, and powdr allows for any ISA to be turned into a zkVM in a couple hundred lines of podwr-asm code.
+
+These possibilities are the core of the mechanism presented here: powdr is able to analyze the guest program at compile time, and optimize the code with fresh accelerated circuits.
+
+## Accelerate
+
+The idea behind accelerated circuits is rather simple: we select assembly code that is heavy and used frequently, and replace it by a "native" instruction that makes use of a new custom circuit to perform the computation more efficiently. So far zkVMs have done this manually. Here, we want to do that automatically.
+
+This is not a completely new idea: similar concepts have been explored in [Ceno](https://eprint.iacr.org/2024/387), [SublonK](https://eprint.iacr.org/2023/902), and as recently as last week, [Morgana](https://eprint.iacr.org/2025/65). Morgana is especially interesting for our approach because they are orthogonal and can be potentially combined.
+
+powdrVM provides the first implementation of this concept, directly applied to Rust programs, effectively bringing the best of zkVMs and circuits together in a future-proof way.
+
+### Basic Block Choice
+
+A program basic block is a sequence of instructions that do not alter the control-flow of the program, that is, they do not branch nor terminate. Furthermore, the block must always be executed from the first instruction.
+
+First, an assembly basic block (or multiple) must be chosen for acceleration. Let's take [Keccak used in Rust compiled to powdr-asm](https://gist.github.com/leonardoalt/9ea0c0368b9aae0fa6d3506a0fcf321c#file-keccak-asm-L1174) as an example. Label `___dot_L20000ae8` points to the largest basic block in the code (in number of instructions), which implements a Keccak permutation.
+
+```rust
+___dot_L20000ae8:
+    .debug loc 15 432 25;
+    mload x2, 208, x10, 32;
+    ...700+ instructions	
+```
+
+We collect this block, and replace it by a new instruction:
+
+```rust
+___dot_L20000ae8:
+    keccak_auto_acc;
+```
+
+### Circuit Synthesis
+
+Now the main part: synthesizing a new circuit out of this block. Similarly to several aspects of compilers, it consists of layered simple steps.
+
+#### Instruction Inlining
+
+In powdrVM, the CPU AIR ([Keccak in Rust CPU AIR example](https://gist.github.com/leonardoalt/9ea0c0368b9aae0fa6d3506a0fcf321c#file-keccak-asm-L20)) is responsible for executing each instruction as intended. This includes, for example, using registers, communicating with memory, and delegating specialized operations to other AIRs, such as bitwise operations.
+
+For each instruction in the block, we copy and inline the entire CPU AIR, providing the necessary constraints for all inline instructions. This sounds scary and heavy at first, but a sequence of optimizers makes the circuit viable.
+
+Note that even in the worst case the number of trace cells remains the same with the new circuit.
+
+#### Optimizer 1: Instruction Flags
+
+Since we know which instructions are part of the new circuit, we can substitute instruction flags which are used by the CPU AIR's by constant values. This removes wires, gates, and decreases the degree of the constraints.
+
+#### Optimizer 2: Unused Cells
+
+After the instruction flags are hardcoded, we can propagate this knowledge to the constraints. Any constraint that is not used by the analyzed instruction becomes a tautology (0 = 0) and can be removed. This optimization basically transforms the new VM inlined copy into a circuit, that is, it goes from a generic AIR to a custom-purposed statically-sized set of gates.
+
+#### Optimizer 3: Memory
+
+One of the main differences between VM and circuit implementations is that while circuits use wires and gates to represent and pass data, VMs use memory (nitpick: most RISC-V zkVMs use memory cells as register space). 
+
+The final VM artifacts to be optimized away are memory accesses performed by the instructions. The new accelerated circuit will still communicate with the VM via memory operations that cannot be removed, but we can remove any memory accesses performed within the block that are not needed outside. In the case of Keccak, this leads to thousands of removed memory operations.
+
+## Performance
+
+Preliminary experiments show that this technique has the potential to pave the path towards viable client-side proofs for zkVMs.
+
+### Keccak
+
+First, we have a [small example computing Keccak](https://github.com/powdr-labs/powdr/blob/main/riscv/tests/riscv_data/keccak/src/main.rs), which is used as part of our tests.
+
+|                | Software Keccak | Manual Keccak | Automatic Keccak|
+| -------------- | --------------- | ------------- | --------------- |
+| Cycles CPU     | 126_764         | 27_600        | 27_600          |
+| Cycles Memory  | 524_288         | 131_072       | 131_072         |
+| Cycles Bitwise | 262_144         | 65_536        | 262_144         |
+| Cycles Shift   | 65_536          | 16_384        | 65_536          |
+| Cycles Keccak  | 0               | 64            | 64              |
+| CPU width      | 77              | 78            | 78              |
+| Memory width   | 13              | 13            | 13              |
+| Bitwise width  | 12              | 12            | 12              |
+| Shift width    | 11              | 11            | 11              |
+| Keccak width   | 0               | 2_461         | 3_674           |
+
+The table above shows the VM cycle count and the number of columns in the CPU, Memory, Bitwise, Shift and Keccak AIRs (the most used in this case), when using powdrVM with the software version of Keccak, the [manually written circuit from powdr's stdlib](https://github.com/powdr-labs/powdr/blob/main/std/machines/hash/keccakf32_memory.asm), and the automatically generated circuit.
+
+In a simple analysis we can see that the number of cells used by the AIRs is:
+- software Keccak: 126_764 * 77 + 524_288 * 13 + 262_144 * 12 + 65_536 * 11 + 0 = 20_443_196 (reference).
+- manually written circuit: 27_600 * 78 + 131_072 * 13 + 65_536 * 12 + 16_384 * 11 + 64 * 2_461 = 4_980_896.
+    - 4.1x improvement
+- automatic compiled circuit: 27_600 * 78 + 131_072 * 13 + 262_144 * 12 + 65_536 * 11 + 64 * 3674 = 7_958_496.
+    - 2.56x improvement
+    - the main loss point here compared to the hand-written Keccak circuit is that the automatic one still uses the Bitwise and Shift instructions, whereas the hand-written Keccak uses custom gates to represent those operations as needed in a more compact way. Further inlining those instructions inside the new circuit could bring the two versions closer together.
+
+Although there are nuances not demonstrated here, AIR cells often translate roughly to proof time, so we can expect a concrete decrease in proof time once the full sound integration is finalized. Moreover, this is a small example and the more complex the input the larger the gap, so we are confident that we can expect even higher gains in benchmarks that require continuations and that have not been previously accelerated via circuits.
+
+Note also that the performance of the auto-generated circuit is already comparable to the manually written one! With more optimizations the gap will decrease further, and soon we may rely mostly on automatically accelerated programs.
+
+### Matrix multiplication
+
+The second example contains a naive [matrix multiplication written in Rust](https://gist.github.com/leonardoalt/73c12e054f9e9d3a1691dc5699404029). In this case we do not have a manually written circuit to compare to, as this application is not common enough to force teams to spend time writing circuits manually. However, with auto-generated custom circuits, it can be accelerated nonetheless:
+
+|                | Software code | Automatic circuit |
+| -------------- | ------------- | ----------------- |
+| Cycles CPU     | 836_300       | 241_300           |
+| Cycles Memory  | 4_194_304     | 1_048_576         |
+| Cycles Mat-mul | 0             | 1_024             |
+| CPU width      | 77            | 78                |
+| Memory width   | 13            | 13                |
+| Mat-mul width  | 0             | 4_747             |
+
+Similarly to the previous example, the longest basic block is chosen to be accelerated.
+
+We follow a similar analysis on the number of used cells:
+- software mat-mul: 836_300 * 77 + 4_194_304 * 13 =  118_921_052 (reference).
+- automatic compiled circuit: 241_300 * 78 + 1_048_576 * 13 + 1_024 * 4_747 = 37_313_816.
+    - 3.18x improvement
+
+#### Basic Block Selection Strategy
+
+In both examples above the strategy for selecting the basic blocks to be accelerated was simply taking the longest basic block. This may seem trivial in these cases, but clearly a single large block will not necessarily always be the costliest.
+
+Below we use a mixed compile-time and runtime strategy to select the costliest blocks, where the cost equals the number of instructions in a block multiplied by the amount of times it is called in this particular example (which can be emulated orders of magnitude faster than computing a proof).
+
+We extend the table with the results accelerating the 2, 3, and 5 costliest basic blocks in different runs:
+
+|                          | Software     | 1 circuit | 2 circuits | 3 circuits | 5 circuits |
+|--------------------------|---------|-----------|------------|------------|------------|
+| Cycles CPU               |  836_300 |    241_300 |     125_700 |      95_100 |      88_300 |
+| Cycles Memory            | 4_194_304 |   1_048_576 |     524_288 |     524_288 |     524_288 |
+| Cycles mat-mul circuit 1 |       0 |      1_024 |       1_024 |       1_024 |       1_024 |
+| Cycles mat-mul circuit 2 |       0 |         0 |       1_024 |       1_024 |       1_024 |
+| Cycles mat-mul circuit 3 |       0 |         0 |       1_024 |      32_768 |      32_768 |
+| Cycles mat-mul circuit 4 |       0 |         0 |          0 |          0 |       1_024 |
+| Cycles mat-mul circuit 5 |       0 |         0 |          0 |          0 |       1_024 |
+| CPU width                |      77 |        78 |         78 |         78 |         78 |
+| Memory width             |      13 |        13 |         13 |         13 |         13 |
+| Mat-mul width circuit 1  |       0 |      3_466 |       3_466 |       3_466 |       3_466 |
+| Mat-mul width circuit 2  |       0 |         0 |        765 |        765 |        765 |
+| Mat-mul width circuit 3  |       0 |         0 |          0 |         17 |         17 |
+| Mat-mul width circuit 4  |       0 |         0 |          0 |          0 |         32 |
+| Mat-mul width circuit 5  |       0 |         0 |          0 |          0 |         35 |
+
+We also accelerated the 10 costliest basic blocks (which in this case meant almost all blocks with cost greater than 0) which led to 86_600 cycles in the CPU AIR. The table above would be less readable with those numbers, so for that configuration we report the final number of cells: 19_170_312.
+
+The table below shows the number of cells in each run, as well as its improvement over the original software version:
+
+|             | Software       | 1 circuit  | 2 circuits  | 3 circuits | 5 circuits  | 10 circuits |
+|-------------|-----------|------------|-------------|------------|-------------|-------------|
+| Total cells | 118_921_052 |   36_002_072 |    20_952_888 |   19_123_144 |    18_661_352 |    19_170_312 |
+| Improvement |           | 3.3x | 5.6x | 6.2x | 6.3x | 6.2x |
+
+A few things to note:
+- 5 accelerated circuits led to the best results where:
+    - CPU AIR length decreased by almost 10x.
+    - Overall cell count (resp. expected proof time) decreased by 6.3x.
+- Accelerating 2 circuits instead of 1 shows a big improvement.
+    - This shows the importance of accelerating hidden procedures as well, besides the obvious ones.
+- There seems to be an optimal number of blocks to accelerate that isn't "all".
+    - When almost all blocks are accelerated, the final performance decreases compared to the best result.
+    
+The numbers above have nuances that could affect the numbers in either direction. We will follow up with benchmarks including full proof generation time once full integration is finalized.
+
+### Optimal Block Selection
+
+There are several parameters to take into account when selecting basic blocks to be accelerated. Above we have used 2: the block's length in number of instructions, and how often it is executed in selected runs. However, the number of witness columns and the individual constraints of the generated circuits also influence the final expected savings.
+
+One potentially optimal solution that we intend to explore is to modify every single basic block to have both the original software version and a new precompile, making the code transformation compile-time only. The prover can choose at witness generation time which one to use, for each individual. This can be informed by a preemptive analysis on the given inputs with minimal overhead.
+
+Other traditional techniques such as branch prediction can also be used to even connect multiple blocks into a single new circuit when advantegeous.
+
+## Witness generation
+
+As mentioned above, witness generation often forces circuit code to be duplicated. This is completely bypassed here with powdr's automated witness generation. It consists of multiple internal runtime constraint solvers which also give soundness guarantees, and it's currently being JIT-accelerated. Topic for a different article though.
+
+## Which ZK prover does it support?
+
+All of them!
+
+Since powdr is backend agnostic, most circuits can be used with any proof system that powdr supports. This currently includes Plonky3, Stwo, Halo2 and eSTARK.
+
+## Conclusion & Future Work
+
+This article has presented a compiler technique to accelerate zkVM guest programs with automatically generated custom circuits. Such circuits have gates that correspond to ISA instructions (RISC-V in powdrVM's case), therefore while hand-written circuits may still carry an inherent advantage from the ability to add new gates, the VM overhead is removed.
+
+The powdr SDK and powdrVM have been extended with the new experimental feature. Because of powdr's modular architecture the new circuits can be used over any ISA and use any of the supported zk provers, ensuring it is future-proof by design.
+
+Our preliminary experiments have shown that this approach has big potential to decrease ZK proof time by an order of magnitude or more.
+
+Our next concrete steps are:
+
+- Finalize the integration with powdrVM.
+- Run end-to-end benchmarks including proof generation.
+- Optimize the generated circuits even more.
+- Attempt to achieve 10x proof time improvements in key benchmarks.
+
+It is also exciting to note that our approach is orthogonal to Morgana and they can likely be combined to yield even better results, since it would drastically reduce the cost of adding new circuits. We intend to research the feasibility of adding a Morgana implementation to powdr as well.
