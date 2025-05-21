@@ -1,0 +1,59 @@
+---
+title: 'powdr-OpenVM: end-to-end autoprecompiles'
+date: '2025-05-21'
+summary: "powdr and OpenVM are now integrated, supporting custom guest acceleration using autoprecompiles."
+---
+
+# powdr-OpenVM: end-to-end autoprecompiles
+
+We recently presented an approach to [automatically synthesize precompiles for zkVMs](https://www.powdr.org/blog/auto-acc-circuits). We were able to see the potential of such autoprecompiles in those early experiments in terms of total committed cells. Now, we are excited to share end-to-end proof generation performance numbers. The experiments presented here show that manually written precompiles for zkVMs might become artifacts of the past sooner than we think.
+
+### powdr 🤝 OpenVM
+
+[powdr labs](https://www.powdr.org/) and [Axiom](https://www.axiom.xyz/) have been collaborating to take advantage of the flexibility provided by both [powdr](https://github.com/powdr-labs/powdr) and [OpenVM](https://github.com/openvm-org/openvm/), stacking them in order to achieve better performance than the individual parts. We use OpenVM's base RISC-V zkVM implementation, enhanced with powdr middleware providing autoprecompiles and various compile-time chip optimizations based on static analysis and constraint solving.
+
+### Keccak + autoprecompiles
+
+In this experiment we report on the end-to-end proof generation time for 25000 Keccak iterations in a Rust guest in 3 scenarios:
+
+1. **Software**. Uses [tinykeccak](https://github.com/debris/tiny-keccak) for Keccak computation, no acceleration.
+2. **Manual precompile**. Uses the [manually written Keccak precompile](https://github.com/openvm-org/openvm/blob/main/extensions/keccak256/circuit/src/air.rs) used in OpenVM.
+3. **Autoprecompile**. Uses powdr's autoprecompile generation and optimization to accelerate the software version.
+
+The proofs are computed from continuations segments up to one single STARK that compresses the recursion tree. The experiment was run on CPU using a machine with Intel Xeon Gold 5412U and 256GB DDR5 RAM.
+
+#### Results
+
+The table below shows the performance and comparison results.
+
+|                    | Segments | Proof time (s) | Times faster than software | Times slower than manual precompile |
+|--------------------|----------|:--------------:|:-----------------:|:--------------------------:|
+| Software           |       49 |       1,380.65 |              1.00 |                      12.22 |
+| Manual precompile  |        4 |         112.95 |             12.22 |                       1.00 |
+| Autoprecompiles |        5 |         253.28 |              **5.45** |                       **2.24** |
+
+As we can see from the number of segments, both scenarios with precompiles drastically reduce the number of cycles compared to the software case, as expected. This translates to better proof generation time for app proofs, which compute one STARK per segment.
+
+Precompiles are usually complex chips with many columns and constraints. The number of columns, especially, can have a negative effect in the recursion layer, since it affects STARK verification. Considering the full end-to-end proof generation time we can see that the manual precompile achieves 12.22x improvement versus the software version.
+The third row of the table is the main object of this experiment. The automatically synthesized autoprecompiles achieve a **total improvement of 5.45x** over the software version, and are **only 2.24x** slower than the manually optimized Keccak precompile.
+
+This is a strong result, showing that with a couple more optimizations the autoprecompiles should be more performant than manual ones! We expect this trend to materialize over other benchmarks as well, **making manually written zkVM precompiles redundant in the presence of safer (FV? 👀), faster and more productive autoprecompiles**.
+
+Note that this approach applies not only to precompiles that already exist, but to any costly guest program code that benefits from circuit acceleration.
+
+### Upcoming
+
+*powdr* is fully committed to enhancing existing zkVMs' performance and security using static analysis and other compiler-based techniques. If you are interested in learning more or collaborating reach out to us on [Matrix](https://matrix.to/#/#powdr:matrix.org), [Github](https://github.com/powdr-labs/powdr), or [Twitter](https://twitter.com/powdr_labs).
+
+Future work includes:
+
+- **Benchmarking**:
+It is now clear that autoprecompiles have similar efficiency to manually written precompiles, without the need for developer intervention. We now intend to perform more benchmarking in the presence of manual precompiles, for example Ethereum L1 verification.
+- **Moar Optimizations**:
+We are constantly working on more optimizations that propagate to any autoprecompile, including:
+    - Stack accesses
+    - Heap accesses
+    - Chip stacking
+    - Optimal column usage/inlining
+- **Formal Verification**:
+Synthesizing custom circuits for each guest is unfeasible from an engineer's perspective, both from the development time and security risk introduced by hundreds or thousands of precompiles. Automatically synthesizing them also implies that formally verifying their soundness scales to all users. Because of the uniform shape that autoprecompiles have, re-using or building new tooling to analyze and formally verify them should be much simpler than doing the same for manual precompiles.
