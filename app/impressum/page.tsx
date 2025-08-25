@@ -10,9 +10,9 @@ export default function Impressum() {
       <div className="prose max-w-none pb-8 pt-8 dark:prose-invert">
         <h2>powdr labs GmbH</h2>
         <p>
-          Fichtestr, 32
+          Wetzlarerstr. 54
           <br />
-          10967 Berlin
+          14482 Potsdam
         </p>
         <p>
           Handelsregister: HRB260037B
