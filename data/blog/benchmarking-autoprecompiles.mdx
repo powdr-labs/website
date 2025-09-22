@@ -164,7 +164,7 @@ As mentioned above, this would likely be less of an issue with a different provi
 | 1000                      | 1        | 126.35             | 1.84                                 |
 | 2000                      | 1        | 128.18             | 1.81                                 |
 
-With 2000 autoprecompiles, we achieve a 1.81x speedup in app proving time (and even a bit more with only 1000 autoprecompiles). At this point, only 5% of the trace cells are still in RISC-V instruction chips; 62% are in one of OpenVM's precompiles, and 33% are in autoprecompiles. In other words, we are accelerating almost all computations that are not already accelerated, while only increasing the number of trace cells in any precompile by approximately 50%.
+With 2000 autoprecompiles, we achieve a 1.81x speedup in app proving time (and even a bit more with only 1000 autoprecompiles). At this point, only 5% of the trace cells are still in RISC-V instruction chips; 62% are in one of OpenVM's precompiles, and 33% are in autoprecompiles. In other words, increasing the number of autoprecompiles further could reduce the number of trace cells by at most 5%.
 
 ### Accelerating pure software
 
