@@ -1,5 +1,5 @@
 ---
-title: 'Benchmarking Autoprecompiles'
+title: 'Accelerating Ethereum with Autoprecompiles'
 date: '2025-09-22'
 summary: "In this article, we compare powdr's autoprecompiles to OpenVM's manually written precompiles and evaluate the technique on an Ethereum block verification benchmark."
 ---
