@@ -18,7 +18,7 @@ In a nutshell, autoprecompiles work by taking a [basic block](https://en.wikiped
 
 In a zkVM like OpenVM, each instruction has its own trace table, where the number of columns depends on the instruction, and the number of rows equals the number of times this instruction was executed. An autoprecompile essentially adds another table, which proves the correct execution of the entire basic block. This table tends to be wider and has one row for each time the basic block is called:
 
-![Autoprecompiles transformation](/static/images/autoprecompiles-analyzer.png)
+![Autoprecompiles transformation](/static/images/autoprecompiles.png)
 
 Because of the optimizations, the total trace area is typically several times smaller. This translates pretty well to proving time! However, depending on the proof system, the increase in the number of columns can lead to an increase in *verification time*, which hurts *recursion time*. For this reason, we report the end-to-end proving time, including recursion.
 
@@ -194,4 +194,4 @@ We achieve a 1.37x improvement *today* with recursion taken into account and a 1
 
 ---
 
-**Experimental setup**: All experiments are run on an [Intel® Xeon® Gold 5412U](https://www.intel.com/content/www/us/en/products/sku/232374/intel-xeon-gold-5412u-processor-45m-cache-2-10-ghz/specifications.html) with 256GB of RAM. Note that the reported times exclude witness generation, as we have focused our efforts on optimizing proving time. The raw measurements can be found [here](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/2025-09-18-larger), [here](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/results-20-09-manual-and-apcs-app) and [here](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/results-20-09-software-apcs-recursion).
+**Experimental setup**: All experiments are run on an [Intel® Xeon® Gold 5412U](https://www.intel.com/content/www/us/en/products/sku/232374/intel-xeon-gold-5412u-processor-45m-cache-2-10-ghz/specifications.html) with 256GB of RAM. Note that the reported times exclude witness generation, as we have focused our efforts on optimizing proving time. The raw measurements can be found here: [Comparison to OpenVM's precompiles](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/2025-09-18-larger), [Reth with manual precompiles](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/results-20-09-manual-and-apcs-app) and [Reth without manual precompiles](https://github.com/powdr-labs/bench-results/tree/gh-pages/results/results-20-09-software-apcs-recursion).
