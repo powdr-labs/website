@@ -33,7 +33,7 @@ Overall, for frequently executed basic blocks, the advantages outweigh the disad
 
 How do our automatically generated precompiles compare to manually written ones? We looked into this in a [previous blog post](https://www.powdr.org/blog/powdr-openvm-autoprecompiles), where we compared OpenVM's Keccak precompile to autoprecompiles. Since then, we have tested our approach against many other precompiles, and we have learned a lot!
 
-In what follows, we report single-CPU proving time (using an Intel® Xeon® Gold 5412U), including recursion unless otherwise noted and excluding witness generation.
+In what follows, we report single-CPU proving time (using an Intel® Xeon® Gold 5412U), including recursion unless otherwise noted.
 
 ### Keccak
 
@@ -91,7 +91,7 @@ We draw the following conclusions:
 - There is a 2.5x speedup from the hint-acceleration
 - In both experiments, there is a >3.5x speedup from applying autoprecompiles.
 - Hint-acceleration and autoprecompiles are orthogonal optimizations: Combining both yields a close to 10x speedup over the original software run!
-- The manually written precompile is still a lot faster. We suspect that this is because a big chunk of the computation could still be accelerated by hints, such as the modular reduction when doing a base field multiplication.
+- The manually written precompile is still a lot faster. We suspect that this is because a big chunk of the computation could still be accelerated by more hints, such as the modular reduction when doing a base field multiplication.
 
 ### ECDSA
 
@@ -127,13 +127,13 @@ Real-world programs are a lot less structured than the artificial benchmarks abo
 
 Here, every basic block in the program is a box, sorted by the number of trace cells it causes in the zkVM when run without autoprecompiles. This number also determines the width of the box. The height indicates the "effectiveness", i.e., the factor by which an autoprecompile would reduce that trace area. Finally, the color encodes the number of instructions in that basic block.
 
-As you can see, autoprecompiles achieve a close to 4x reduction on average; the exact number depends on the basic block. Autoprecompiles tend to be more effective for larger basic blocks.
+Autoprecompiles achieve a close to 4x reduction on average; the exact number depends on the basic block. Autoprecompiles tend to be more effective for larger basic blocks.
 
 To measure the effect of autoprecompiles, we consider two scenarios:
 1. Manually written precompiles already exist (the state-of-the-art). We apply autoprecompiles only to blocks that are not already accelerated by existing precompiles.
 2. No manually written precompiles are used.
 
-The results below are based on [our fork of OpenVM's `reth` benchmark](https://github.com/powdr-labs/openvm-reth-benchmark/tree/main). It verifies block [21882667](https://etherscan.io/block/21882667) of the Ethereum main net, which contains 133 transactions and consumes a bit under 10M gas.
+The results below are based on [our fork of OpenVM's `reth` benchmark](https://github.com/powdr-labs/openvm-reth-benchmark/tree/main). It verifies block [21882667](https://etherscan.io/block/21882667) of Ethereum mainnet, which contains 133 transactions and consumes a bit under 10M gas.
 
 ### Accelerating beyond OpenVM's precompiles
 
@@ -168,7 +168,7 @@ With 2000 autoprecompiles, we achieve a 1.81x speedup in app proving time (and e
 
 ### Accelerating pure software
 
-In this experiment, we removed any OpenVM precompile from the block verification program, simulating a world where they don't exist at all. We used the modified Rust code to include the base field inversion hint mentioned above.
+In this experiment, we removed all OpenVM precompiles from the block verification program, simulating a world where they don't exist at all. We used the modified Rust code to include the base field inversion hint mentioned above.
 
 | Number of autoprecompiles | Segments | Proof time (s) | Times faster than software | Times slower than manual precompile |
 |---------------------------|----------|----------------|----------------------------|-------------------------------------|
@@ -190,7 +190,7 @@ For Keccak and U256 acceleration, autoprecompiles perform *better* than OpenVM's
 
 > What do autoprecompiles add *on top* of manually written precompiles on real-world workloads, such as Ethereum block verification?
 
-We achieve a 1.37x improvement *today* with recursion taken into account and a 1.81x improvement considering app proofs only. Assuming that the recursion time for wide AIR tables will improve and that autoprecompiles continue to improve over time, we are confident that we can eventually double the speed of Ethereum block verification with autoprecompiles alone.
+We achieve a 1.37x improvement *today* with recursion taken into account and a 1.81x improvement considering app proofs only in a single-CPU setup. Assuming that the recursion time for wide AIR tables will improve and that autoprecompiles continue to improve over time, we are confident that we can eventually double the speed of Ethereum block verification with autoprecompiles alone.
 
 ---
 
