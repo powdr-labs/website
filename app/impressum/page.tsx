@@ -15,9 +15,9 @@ export default function Impressum() {
           14482 Potsdam
         </p>
         <p>
-          Handelsregister: HRB260037B
+          Handelsregister: HRB41081P
           <br />
-          Registergericht: Charlottenburg
+          Registergericht: Potsdam
         </p>
 
         <h2>Vertreten durch:</h2>
