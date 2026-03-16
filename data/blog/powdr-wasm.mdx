@@ -6,10 +6,10 @@ summary: 'We are excited to announce powdr-wasm, an optimized zkVM for WebAssemb
 
 # powdr-wasm
 
-[powdr-wasm](TODO) is a new [WebAssembly](TODO)-based zkVM that provides better
-proving performance than [RISC-V](TODO).
-It uses [Crush](TODO) to compile WebAssembly to a zkVM-friendly ISA, and
-implements the ISA as frontend circuits in the [OpenVM](TODO) modular zkVM
+[powdr-wasm](https://github.com/powdr-labs/powdr-wasm) is a new [WebAssembly](https://webassembly.org/)-based zkVM that provides better
+proving performance than [RISC-V](https://riscv.org/).
+It uses [Crush](https://github.com/powdr-labs/crush) to compile WebAssembly to a zkVM-friendly ISA, and
+implements the ISA as frontend circuits in the [OpenVM](https://github.com/openvm-org/openvm) modular zkVM
 framework.
 
 ## WebAssembly vs RISC-V
@@ -31,7 +31,7 @@ Notable features of WebAssembly include:
 
 ## Crush IR/ISA/compiler
 
-[Crush](TODO) is an infinite-register based IR that provides compilation from
+[Crush](https://github.com/powdr-labs/crush) is an infinite-register based IR that provides compilation from
 WebAssembly.
 It flattens WASM's native stack and locals into infinite registers, enabling
 data-flow optimizations and optimizing the compiled program.
@@ -64,7 +64,7 @@ precompiles).
 ### Keccak
 
 In this experiment we report on the end-to-end proof generation time for 25000
-Keccak iterations in a [Rust guest](TODO) via both OpenVM RISC-V and
+Keccak iterations in a [Rust guest](https://github.com/powdr-labs/powdr-wasm/tree/main/sample-programs/keccak_with_inputs) via both OpenVM RISC-V and
 powdr-wasm.
 
 | Metric      | powdr-wasm | RISC-V | Improvement  |
@@ -87,7 +87,7 @@ stack is heavily optimized.
 ### Reth
 
 In this experiment we report on the end-to-end proof generation time for a
-[Reth-based guest] verifying Ethereum mainnet block 24171384 via both OpenVM RISC-V
+[Reth-based guest](https://github.com/powdr-labs/openvm-reth-benchmark) verifying Ethereum mainnet block 24171384 via both OpenVM RISC-V
 and powdr-wasm, without ZK precompiles.
 
 | Metric      | powdr-wasm | RISC-V | Improvement  |
@@ -108,12 +108,12 @@ large reduction in prover work.
 ### Geth/Keeper
 
 In this experiment we report on the end-to-end proof generation time for
-[Keeper, a Geth-based guest] verifying Ethereum Hoodi block 1151683 via powdr-wasm
+[Keeper, a Geth-based guest](https://github.com/ethereum/go-ethereum/tree/master/cmd/keeper) verifying Ethereum Hoodi block 1151683 via powdr-wasm
 without ZK precompiles.
 Because WebAssembly is a universal compilation target, powdr-wasm is not
 restricted to Rust guests. Any language that compiles to WASM can be proven,
 and this benchmark showcases exactly that: Keeper is written in **Go**, compiled
-to WASM via the [WASI]() runtime, and proven end-to-end by powdr-wasm. This
+to WASM via the [WASI](https://wasi.dev/) runtime, and proven end-to-end by powdr-wasm. This
 opens the door to proving programs written in Go, Kotlin, Swift, and other
 WASM-targeting languages, greatly expanding the set of applications that can
 leverage zero-knowledge proofs.
