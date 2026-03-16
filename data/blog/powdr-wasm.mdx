@@ -110,11 +110,23 @@ large reduction in prover work.
 In this experiment we report on the end-to-end proof generation time for
 [Keeper, a Geth-based guest] verifying Ethereum Hoodi block 1151683 via powdr-wasm
 without ZK precompiles.
-While there is no direct comparison to RISC-V for this workload, we can see that
-powdr-wasm supports Ethereum execution via Go as well, using the [wasi]() runtime.
+Because WebAssembly is a universal compilation target, powdr-wasm is not
+restricted to Rust guests. Any language that compiles to WASM can be proven,
+and this benchmark showcases exactly that: Keeper is written in **Go**, compiled
+to WASM via the [WASI]() runtime, and proven end-to-end by powdr-wasm. This
+opens the door to proving programs written in Go, Kotlin, Swift, and other
+WASM-targeting languages, greatly expanding the set of applications that can
+leverage zero-knowledge proofs.
 
-Basic metrics: <https://gist.github.com/leonardoalt/551a59e71d1634fa472627c1a206879a>
-Wall time: <https://gist.github.com/leonardoalt/1ebdeb821b2420543d939ec17edff1d6>
+| Metric        | powdr-wasm |
+| ------------- | ---------- |
+| Trace Cells   | 352.0B     |
+| Segments      | 467        |
+| Proof Time    | 976.3s     |
+| E2E Wall Time | 1042.4s    |
+
+Go support is still in its early stages, and we expect to keep improving it
+as new Crush compiler optimizations and autoprecompiles are added.
 
 ## Upcoming
 
