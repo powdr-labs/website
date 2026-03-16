@@ -1,7 +1,7 @@
 ---
 title: 'powdr-wasm: an optimized zkVM for WebAssembly'
 date: '2026-03-19'
-summary: "We are excited to announce powdr-wasm, an optimized zkVM for WebAssembly, built on top of OpenVM and the Crush ISA/compiler."
+summary: 'We are excited to announce powdr-wasm, an optimized zkVM for WebAssembly, built on top of OpenVM and the Crush ISA/compiler.'
 ---
 
 # powdr-wasm
@@ -12,9 +12,9 @@ It uses [Crush](TODO) to compile WebAssembly to a zkVM-friendly ISA, and
 implements the ISA as frontend circuits in the [OpenVM](TODO) modular zkVM
 framework.
 
-# WebAssembly vs RISC-V
+## WebAssembly vs RISC-V
 
-RISC-V has been chosen for many zkVMs because of its simplicity. 
+RISC-V has been chosen for many zkVMs because of its simplicity.
 However, its hardware-first design does not optimize for the cost model of
 zkVMs.
 WebAssembly was designed to be a portable format for programs, and has been
@@ -23,6 +23,7 @@ zkVMs](https://hackmd.io/@leoalt/best-isa-ethereum) and
 [blockchains](https://ethresear.ch/t/why-risc-v-is-not-a-good-choice-for-an-l1-delivery-isa-and-why-wasm-is-a-better-one/23491).
 
 Notable features of WebAssembly include:
+
 - Platform independent portable format
 - High level structured information
 - No stack in memory
@@ -45,7 +46,7 @@ the computation, and write the result back to memory.
 
 Crush solves this by using infinite registers relative to a frame pointer,
 never spilling registers to memory, and therefore optimizing the 4 operations
-RISC-V often needs for a local computation to a single one. 
+RISC-V often needs for a local computation to a single one.
 As we see below in the experiments, this optimization alone provides massive
 benefits compared to RISC-V zkVM proofs.
 
@@ -60,36 +61,60 @@ The goal of these benchmarks is to test the performance of the base zkVMs, so
 no precompiles were used (neither autoprecompiles nor hand-written
 precompiles).
 
-### Keccak 
+### Keccak
 
 In this experiment we report on the end-to-end proof generation time for 25000
 Keccak iterations in a [Rust guest](TODO) via both OpenVM RISC-V and
 powdr-wasm.
 
-basic metrics: https://gist.github.com/leonardoalt/4c9016290ecff4f24bbc853330508e74
-air comparison: https://gist.github.com/leonardoalt/c79ab37fa79bf75e17e8c9d999ae3ad3
+| Metric      | powdr-wasm | RISC-V | Improvement  |
+| ----------- | ---------- | ------ | ------------ |
+| Trace Cells | 32.5B      | 52.7B  | 1.62x fewer  |
+| Segments    | 45         | 77     | 1.71x fewer  |
+| Proof Time  | 96.5s      | 144.3s | 1.50x faster |
 
-crush wall times: https://gist.github.com/leonardoalt/39dee2bf4a86d435cccf8c7f987247fe
-riscv wall times: https://gist.github.com/leonardoalt/fa1151d841d1b1383417f415b01c5b5d
+powdr-wasm produces **1.62x fewer trace cells** and **1.50x faster proof
+times** compared to RISC-V on this workload.
+
+A per-chip breakdown of the AIR trace reveals where the savings come from. The
+most dramatic difference is in the chip responsible for memory load/store
+operations: powdr-wasm uses only 2.4B cells compared to RISC-V's 15.0B, a
+**6.16x reduction**. This directly reflects the elimination of register spilling:
+because Crush operates on infinite registers, the constant load/store calls
+that RISC-V needs to shuffle values between its 32 registers and the virtual
+stack is heavily optimized.
 
 ### Reth
 
 In this experiment we report on the end-to-end proof generation time for a
-[Reth-based guest] verifying Ethereum mainnet block Y via both OpenVM RISC-V
+[Reth-based guest] verifying Ethereum mainnet block 24171384 via both OpenVM RISC-V
 and powdr-wasm, without ZK precompiles.
 
-TODO
-basic metrics: https://gist.github.com/leonardoalt/41e493e3236f5e86d111823cca349630
-air comparison: https://gist.github.com/leonardoalt/0ae659ca8709d339351b1b67fb230708
+| Metric      | powdr-wasm | RISC-V | Improvement  |
+| ----------- | ---------- | ------ | ------------ |
+| Trace Cells | 106.9B     | 166.5B | 1.56x fewer  |
+| Segments    | 141        | 211    | 1.50x fewer  |
+| Proof Time  | 287.6s     | 447.0s | 1.55x faster |
 
-crush wall times: https://gist.github.com/leonardoalt/b57f1c722b41601a979761d40648a472
-risc-v wall times: https://gist.github.com/leonardoalt/dbf2ab4ffd0b4e59498ccc19c557eacc
+On this real-world Ethereum workload, powdr-wasm produces **1.56x fewer trace cells**
+and is **1.55x faster** in proof generation.
+
+As in the Keccak benchmark, the memory load/store chip dominates the savings:
+powdr-wasm uses 13.9B cells versus RISC-V's 63.0B, a **4.53x reduction**. This
+confirms that even on a complex program like a full Ethereum execution client, the
+elimination of register spilling via Crush's infinite-register model yields a
+large reduction in prover work.
 
 ### Geth/Keeper
 
 In this experiment we report on the end-to-end proof generation time for
-[Keeper, a Geth-based guest] verifying Ethereum Hoodi block Y via powdr-wasm
+[Keeper, a Geth-based guest] verifying Ethereum Hoodi block 1151683 via powdr-wasm
 without ZK precompiles.
+While there is no direct comparison to RISC-V for this workload, we can see that
+powdr-wasm supports Ethereum execution via Go as well, using the [wasi]() runtime.
+
+Basic metrics: <https://gist.github.com/leonardoalt/551a59e71d1634fa472627c1a206879a>
+Wall time: <https://gist.github.com/leonardoalt/1ebdeb821b2420543d939ec17edff1d6>
 
 ## Upcoming
 
