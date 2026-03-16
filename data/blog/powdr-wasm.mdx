@@ -71,9 +71,9 @@ powdr-wasm.
 | ----------- | ---------- | ------ | ------------ |
 | Trace Cells | 32.5B      | 52.7B  | 1.62x fewer  |
 | Segments    | 45         | 77     | 1.71x fewer  |
-| Proof Time  | 96.5s      | 144.3s | 1.50x faster |
+| Proof Time  | 76.7s      | 120.8s | 1.58x faster |
 
-powdr-wasm produces **1.62x fewer trace cells** and **1.50x faster proof
+powdr-wasm produces **1.62x fewer trace cells** and **1.58x faster proof
 times** compared to RISC-V on this workload.
 
 A per-chip breakdown of the AIR trace reveals where the savings come from. The
@@ -94,10 +94,10 @@ and powdr-wasm, without ZK precompiles.
 | ----------- | ---------- | ------ | ------------ |
 | Trace Cells | 106.9B     | 166.5B | 1.56x fewer  |
 | Segments    | 141        | 211    | 1.50x fewer  |
-| Proof Time  | 287.6s     | 447.0s | 1.55x faster |
+| Proof Time  | 239.3s     | 348.1s | 1.45x faster |
 
 On this real-world Ethereum workload, powdr-wasm produces **1.56x fewer trace cells**
-and is **1.55x faster** in proof generation.
+and is **1.45x faster** in proof generation.
 
 As in the Keccak benchmark, the memory load/store chip dominates the savings:
 powdr-wasm uses 13.9B cells versus RISC-V's 63.0B, a **4.53x reduction**. This
@@ -118,12 +118,11 @@ opens the door to proving programs written in Go, Kotlin, Swift, and other
 WASM-targeting languages, greatly expanding the set of applications that can
 leverage zero-knowledge proofs.
 
-| Metric        | powdr-wasm |
-| ------------- | ---------- |
-| Trace Cells   | 352.0B     |
-| Segments      | 467        |
-| Proof Time    | 976.3s     |
-| E2E Wall Time | 1042.4s    |
+| Metric      | powdr-wasm |
+| ----------- | ---------- |
+| Trace Cells | 352.0B     |
+| Segments    | 467        |
+| Proof Time  | 827.6s     |
 
 Go support is still in its early stages, and we expect to keep improving it
 as new Crush compiler optimizations and autoprecompiles are added.
