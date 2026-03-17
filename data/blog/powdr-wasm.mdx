@@ -1,0 +1,86 @@
+---
+title: 'powdr-wasm: an optimized zkVM for WebAssembly'
+date: '2026-03-17'
+summary: 'powdr-wasm is an optimized zkVM for WebAssembly, built on top of OpenVM and the crush ISA.'
+---
+
+# powdr-wasm
+
+[powdr-wasm](https://github.com/powdr-labs/powdr-wasm) is a new [WebAssembly](https://webassembly.org/)-based zkVM that provides better proving performance than [RISC-V](https://riscv.org/) on the same proving backend. It uses [_crush_](https://github.com/powdr-labs/crush), a novel infinite-register compiler framework and IR focused on zkVMs, to compile WebAssembly to a zkVM-friendly ISA. The ISA is implemented as frontend circuits in the [OpenVM](https://github.com/openvm-org/openvm) modular zkVM framework.
+
+## WebAssembly vs RISC-V
+
+RISC-V has been chosen for many zkVMs because of its simplicity. However, its hardware-first design does not optimize for the cost model of zkVMs.
+WebAssembly was designed to be a portable format for programs, and has been argued before to be a better alternative to RISC-V in the [context of zkVMs](https://hackmd.io/@leoalt/best-isa-ethereum) and [blockchains](https://ethresear.ch/t/why-risc-v-is-not-a-good-choice-for-an-l1-delivery-isa-and-why-wasm-is-a-better-one/23491).
+
+Notable features of WebAssembly include:
+
+- Platform independent portable format
+- Structured control flow and explicit function boundaries
+- No stack in memory. Operands live on a native stack that a compiler can map directly to registers, avoiding the memory traffic that comes with RISC-V's stack in memory
+- Standardized ISA and runtime
+
+## crush IR/ISA/compiler
+
+[_crush_](https://github.com/powdr-labs/crush) is an infinite-register based IR that provides compilation from WebAssembly. It flattens WASM's native stack and locals into infinite registers through a series of transformation passes such as data-flow and liveness analysis.
+
+RISC-V's limited set of registers often forces register spilling into memory containing a virtual stack. For many local operations in a high level program, the RISC-V assembly code will need to load 2 operands from the virtual stack, apply the computation, and store the result back, using 4 instructions including memory operations where _crush_ needs one instruction and no memory instructions.
+
+_crush_ solves this by using infinite registers relative to a frame pointer, never spilling registers to memory. This approach combines WASM's stack and locals in a single address space where they can be optimized together. As we see below in the experiments, this central feature alone provides significant benefits compared to RISC-V zkVM proofs.
+
+Furthermore, because _crush_ inherits high level information from WASM, there is additional structure that can be used by autoprecompiles to reduce proof cost. For example, register lifetime information enables dead-register elimination so that unused values do not consume trace cells.
+
+## Benchmarks
+
+We report on selected benchmarks using powdr-wasm against OpenVM v1 which uses RISC-V. The goal of these benchmarks is to test the performance of the base zkVMs, so no precompiles were used (neither autoprecompiles nor hand-written precompiles). All benchmarks were run on a machine with 1 NVIDIA-4090 GPU.
+
+### Keccak
+
+In this benchmark we report on the end-to-end proof generation time for 25000 Keccak iterations in a [Rust guest](https://github.com/powdr-labs/powdr-wasm/tree/main/sample-programs/keccak_with_inputs) via both OpenVM RISC-V and powdr-wasm.
+
+| Metric      | powdr-wasm | RISC-V | Improvement  |
+| ----------- | ---------- | ------ | ------------ |
+| Trace Cells | 32.5B      | 52.7B  | 1.62x fewer  |
+| Segments    | 45         | 77     | 1.71x fewer  |
+| Proof Time  | 76.7s      | 120.8s | 1.58x faster |
+
+A per-chip breakdown of the AIR trace reveals where the savings come from. The largest difference is in the memory load/store chip: powdr-wasm uses only 2.4B cells compared to RISC-V's 15.0B, a **6.16x reduction**, directly reflecting the elimination of register spilling. The ALU chips also show improvement (28.2B vs 20.1B cells, **1.41x**), partly because WASM's native 64-bit operations halve the number of arithmetic cycles for 64-bit values compared to RV32. A RV64-based zkVM might recover some of these ALU gains, but the dominant savings from eliminating memory traffic would remain, since load/store reduction alone accounts for over 60% of the total cell difference in this benchmark.
+
+### Reth
+
+In this benchark we report on the end-to-end proof generation time for a [Reth-based guest](https://github.com/powdr-labs/openvm-reth-benchmark) verifying Ethereum mainnet block 24171384 via both OpenVM RISC-V and powdr-wasm, without ZK precompiles.
+
+| Metric      | powdr-wasm | RISC-V | Improvement  |
+| ----------- | ---------- | ------ | ------------ |
+| Trace Cells | 106.9B     | 166.5B | 1.56x fewer  |
+| Segments    | 141        | 211    | 1.50x fewer  |
+| Proof Time  | 239.3s     | 348.1s | 1.45x faster |
+
+As in the Keccak benchmark, the memory load/store chip dominates the savings: powdr-wasm uses 13.9B cells versus RISC-V's 63.0B, a **4.53x reduction**. The ALU chips improve by **1.19x** (46.6B vs 55.4B cells). This confirms that even on a complex program such as a full Ethereum execution client, the elimination of register spilling via _crush_'s infinite-register model yields a large reduction in prover work.
+
+### Geth/Keeper
+
+In this benchmark we report on the end-to-end proof generation time for [Keeper, a Geth-based guest](https://github.com/ethereum/go-ethereum/tree/master/cmd/keeper) verifying Ethereum Hoodi block 1151683 via powdr-wasm without ZK precompiles. Because WebAssembly is a universal compilation target, powdr-wasm is not restricted to Rust guests. Any language that compiles to WASM can be proven, and this benchmark showcases exactly that: Keeper is written in **Go**, compiled to WASM via the [WASI](https://wasi.dev/) runtime, and proven end-to-end by powdr-wasm. This means programs written in Go, Swift, and other WASM-targeting languages can be proven as well.
+
+| Metric      | powdr-wasm |
+| ----------- | ---------- |
+| Trace Cells | 352.0B     |
+| Segments    | 467        |
+| Proof Time  | 827.6s     |
+
+Go support is still in its early stages, and we expect to keep improving it as new _crush_ compiler optimizations and autoprecompiles are added.
+
+## Upcoming
+
+powdr-wasm has shown that WASM combined with a custom ISA/compiler such as _crush_ shows clear advantages over RISC-V for zkVMs in terms of optimizations and proof time.
+
+These early results motivate further work that includes:
+
+- Autoprecompiles
+- zkVM circuit optimizations
+- _crush_ compiler optimizations
+- _crush_ formal verification
+- OpenVM v2 support
+- Hints (non-deterministic advice to reduce guest cycle counts)
+
+If you are interested in using _crush_, powdr-wasm, or helping optimize them even further, let us know!
