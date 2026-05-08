@@ -1,9 +1,9 @@
 /** @type {import("pliny/config").PlinyConfig } */
 const siteMetadata = {
-  title: 'powdr - an SDK for ZK proofs',
+  title: 'powdr - zkVM acceleration libraries',
   author: 'powdr labs',
   headerTitle: 'powdr',
-  description: 'powdr - an SDK for ZK proofs',
+  description: 'powdr - zkVM acceleration libraries',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://www.powdr.org/',

@@ -23,18 +23,32 @@ export default function Home({ posts }) {
             className="hidden object-contain py-8 dark:block"
           />
           <p className="mt-8 text-center font-mono text-lg font-light md:text-2xl">
-            powdr makes ZK applications future-proof by providing modular, flexible, and upgradeable
-            tooling
+            powdr accelerates and secures zkVMs
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="https://github.com/powdr-labs/powdr/tree/main/riscv/tests/riscv_data/vec_median">
-              <div className="rounded-full bg-primary px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:bg-primary-400">
-                Check out our examples
-              </div>
+          <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 font-mono text-base">
+            <Link
+              href="https://github.com/powdr-labs/powdr"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              autoprecompiles
             </Link>
-            <Link href="https://docs.powdr.org/">
-              <div className="rounded-full bg-secondary px-6 py-3 text-lg font-semibold text-secondary-950 transition-all duration-300 hover:bg-secondary-300">
-                Read our docs
+            <Link
+              href="https://github.com/powdr-labs/crush"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              crush
+            </Link>
+            <Link
+              href="https://github.com/powdr-labs/powdr-wasm"
+              className="underline underline-offset-4 hover:text-primary"
+            >
+              powdr-wasm
+            </Link>
+          </div>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
+            <Link href="/blog">
+              <div className="rounded-full bg-primary px-6 py-3 text-lg font-semibold text-primary-950 transition-all duration-300 hover:bg-primary-400">
+                Check our blog
               </div>
             </Link>
           </div>
@@ -58,11 +72,12 @@ export default function Home({ posts }) {
             />
             <div className="mt-8 max-w-2xl text-center font-mono text-base font-light md:text-lg">
               <p className="mb-4">
-                create and configure ZK solutions in hours, powered by powdr's flexible compiler
+                powdr autoprecompiles automatically generate optimized circuits to accelerate guest
+                programs in zkVMs
               </p>
               <p>
-                seamlessly integrate and upgrade to the latest proving systems like Halo2, Plonky3,
-                eSTARK, GKR and future innovations — without rewriting code
+                crush is a zk-friendly ISA, and powdr-wasm is an optimized zkVM for WebAssembly
+                built on top of OpenVM and crush
               </p>
             </div>
           </div>
