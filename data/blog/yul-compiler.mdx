@@ -1,0 +1,100 @@
+---
+title: 'yul-compiler: a formally verified Yul to EVM compiler, and the verified stack underneath it'
+date: '2026-07-03'
+summary: 'yul-compiler is a work-in-progress formally verified compiler from Yul to EVM, built in Lean on top of two verified layers: yul-semantics and evm-semantics. We already have verified passes and a machine-checked correctness theorem.'
+---
+
+# yul-compiler
+
+[yul-compiler](https://github.com/powdr-labs/yul-compiler) is a formally verified compiler from Yul to EVM, written in [Lean](https://lean-lang.org/). Underneath it sit two formal semantics, [yul-semantics](https://github.com/powdr-labs/yul-semantics) and [evm-semantics](https://github.com/powdr-labs/evm-semantics). The project is work in progress, but we already have verified compilation passes and a machine-checked correctness theorem tying compiled bytecode back to the Yul source.
+
+Yul is the IR of the Solidity compiler, meaning Solidity compiles to Yul and then to EVM. The last step is where a lot of the interesting/dangerous work happens: stack scheduling, optimizations, control flow lowering. Besides Solidity, every toolchain that goes through Yul has to trust that step. Our goal is to make it something you can *prove* instead.
+
+The vision is a formally verified Yul to EVM backend for anything that compiles through Yul, with optimizations that are proven sound and gas performance comparable to [solc](https://soliditylang.org/). That covers the Solidity compiler itself, and also newer verified toolchains like [Verity](https://github.com/lfglabs-dev/verity), which proves its pipeline down to Yul in Lean and currently relies on solc for the final step; plugging in a verified Yul backend closes that last gap and yields an end-to-end verified pipeline. We are not there yet, but real verified passes already exist, and the whole thing is built on a stack we can reason about from top to bottom.
+
+A note on how this is built: AI writes most of the code and proofs, and a project of this scope would not have been feasible for us otherwise. Lean is what makes that safe, since its kernel checks every proof. The only thing left for humans to review are the theorem statements themselves, not the proofs, and not even the interpreter code.
+
+## The stack
+
+The most common way of formally verifying compilers is by defining formal semantics of the source and target languages, so we built those first.
+
+**[yul-semantics](https://github.com/powdr-labs/yul-semantics)** is a formal semantics of Yul in Lean. On its own this is already useful: it lets us prove high level properties about smart contracts at the Yul level, where the code is still readable and close to what a developer wrote, instead of reasoning about raw bytecode. Proofs get easier here too, since the language provides functions and abstract the EVM stack into variables.
+
+**[evm-semantics](https://github.com/powdr-labs/evm-semantics)** is a formal semantics of the EVM in Lean, written as `Prop`-valued inductive relations with an executable shadow proven sound against them. This is the layer that lets us prove EVM-specific optimizations, and, crucially, prove that the Yul compiler is correct with respect to the actual EVM.
+
+As is common in EVM implementations, we run evm-semantics against the [Ethereum Execution Spec Tests](https://github.com/ethereum/execution-spec-tests) (EEST). Every suite we run is clean: modern GeneralStateTests, EEST Osaka `state_tests`, `transaction_tests`, and `blockchain_tests` all pass with zero correctness failures and zero crashes. In other words, the semantics the compiler is verified against is the same EVM the tests describe.
+
+## What Yul looks like in Lean
+
+Here is a complete Yul program written directly in Lean, using yul-semantics' embedded DSL `yul% { ... }` ([`FibExample.lean`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L24)). The program reads a number `n` from calldata and iteratively computes the nth Fibonacci number:
+
+```lean
+def fibContract : Block EVM.Op := yul% {
+  let n := calldataload(0)
+  let a := 0
+  let b := 1
+  for { let i := 0 } lt(i, n) { i := add(i, 1) } {
+    let t := add(a, b)
+    a := b
+    b := t
+  }
+  mstore(0, a)
+  return(0, 32)
+}
+```
+
+This is real Yul that happens to live inside Lean, which means we can state what the program is supposed to compute and prove it. The specification here is simply Lean's standard-library [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html), so there is nothing bespoke to trust on the spec side.
+
+The theorem [`fibContract_correct`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L168) says that for every initial state, running `fibContract` halts, writes `Nat.fib n` (mod `2^256`) to memory slot `0`, and returns that 32-byte word, where `n` is the value read from calldata:
+
+```lean
+theorem fibContract_correct (st0 : EvmState) :
+    ∃ st, Run evm fibContract st0 [] st .halt ∧
+      st.memory = storeWord st0.memory 0
+        (BitVec.ofNat 256 (Nat.fib (wordFrom st0.env.calldata 0).toNat)) ∧
+      st.halted = some (.ret, readBytes st.memory 0 32)
+```
+
+This is a "for every input" statement, not a test over a handful of values: the loop is proven correct against `Nat.fib` for all `n` at once. That is the kind of high level property yul-semantics lets us state and prove about a contract, before the compiler ever turns it into bytecode.
+
+The compiler must preserve these semantics when generating EVM bytecode, and that is exactly what we prove next, for any Yul program.
+
+## The compiler correctness theorem
+
+The main theorem is [`compile_correct`](https://github.com/powdr-labs/yul-compiler/blob/main/YulEvmCompiler/Correctness.lean#L1580), which says the compiler does not lie about what your program does:
+
+```lean
+theorem compile_correct {prog : YulSemantics.Block Op} {is : List Instr}
+    (hcomp : compileProgram prog = some is)
+    {yst0 : EvmState} {V' : VEnv yul} {yst' : EvmState}
+    {o : Outcome}
+    (hrun : YulSemantics.Run yul prog yst0 V' yst' o) :
+    ∃ b : Nat, ∀ s0 : State,
+      FrameOK (assemble is) s0 → StateMatch yst0 s0 →
+      s0.pc = UInt256.ofNat 0 → s0.stack = [] → b ≤ s0.gasAvailable →
+      ∃ s', Steps s0 s' ∧ s'.callStack = [] ∧ StateMatch yst' s' ∧
+        ((o = .normal ∧ s'.halt = .Success ∧ s'.hReturn = .empty) ∨
+         (o = .halt ∧ HaltedMatch yst' s'))
+```
+
+Read in plain terms: **if the compiler successfully compiles a Yul program, then running the compiled bytecode computes exactly what the Yul semantics claim about it.**
+
+A bit more precisely: suppose the Yul program `prog` compiles to instructions `is`, and suppose `prog` runs, under the Yul semantics, from some initial state to a final state with some outcome. Then there is a gas bound `b` such that, starting the EVM from any state matching that Yul input (empty stack, program counter at zero, at least `b` gas), the assembled bytecode steps to a final EVM state that *matches* the Yul final state, and its termination behavior corresponds: a normal Yul return maps to a successful EVM halt, and a Yul halt maps to the matching EVM halt.
+
+Nothing here is about a particular program. The theorem speaks about the compiler itself, quantified over every Yul program it accepts. Two things are worth pulling out: the proof is a forward simulation grounded in the EVM semantics above (so "matches" means matches the real machine's state), and the statement is honest about gas: correctness is conditional on enough gas being available, which is exactly the caveat a real EVM execution carries.
+
+## Why this matters for optimizations
+
+Once you have a compiler proven correct against a real EVM semantics, optimizations stop being scary. An optimization is just another pass, and to add it soundly you prove it preserves the semantics. We have already explored [provably safe optimizations](https://leonardoalt.github.io/provably-safe-optimizations) at the bytecode level; here the same idea lives inside the compiler, where every accepted program benefits at once. That is the path to matching solc's optimization efficiency without giving up the guarantee: aggressive optimizations, each carrying a proof. In practice, any external tool, including SMT solvers or AI autoresearch agents, can be called to optimize the Yul or EVM code, as long as it can prove the semantics hold.
+
+## Where we are
+
+This is WIP. Not all of Yul is covered, and there are no optimizers currently implemented. Still, a lot already works: verified semantics for both Yul and the EVM, an EVM semantics that passes the main EEST suites, and a machine-checked correctness theorem connecting compiled bytecode back to Yul source, with verified passes already in place.
+
+The endgame is a compiler backend that any toolchain targeting Yul could drop in, where the optimizations are as bold as you like because each one comes with a proof, and where "trust the compiler" becomes "read the theorem".
+
+All of this is developed in the open. If you would like to use yul-compiler in your toolchain, or help build it, we would love to hear from you!
+
+---
+
+*Thanks to Nethermind's [EVMYulLean](https://github.com/NethermindEth/EVMYulLean), which pioneered formal EVM and Yul semantics in Lean and inspired much of the architecture of this stack.*
