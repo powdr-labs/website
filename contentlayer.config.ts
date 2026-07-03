@@ -19,10 +19,17 @@ import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 import rehypeKatex from 'rehype-katex'
 import rehypeCitation from 'rehype-citation'
-import rehypePrismPlus from 'rehype-prism-plus'
+import rehypePrismGenerator from 'rehype-prism-plus/generator'
 import rehypePresetMinify from 'rehype-preset-minify'
+import { refractor } from 'refractor/lib/all.js'
+import leanSyntax from './scripts/refractor-lean.js'
 import siteMetadata from './data/siteMetadata'
 import { allCoreContent, sortPosts } from 'pliny/utils/contentlayer.js'
+
+// refractor (used by rehype-prism-plus) has no Lean grammar, so register
+// our own and build the prism plugin from the extended refractor instance
+refractor.register(leanSyntax)
+const rehypePrismPlus = rehypePrismGenerator(refractor)
 
 const root = process.cwd()
 const isProduction = process.env.NODE_ENV === 'production'
