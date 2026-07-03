@@ -43,16 +43,15 @@ def fibContract : Block EVM.Op := yul% {
 }
 ```
 
-This is real Yul that happens to live inside Lean, which means we can state what the program is supposed to compute and prove it. The specification here is simply Lean's standard-library [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html), so there is nothing bespoke to trust on the spec side.
+This is real Yul that happens to live inside Lean, which means we can state what the program is supposed to compute and prove it. The specification here is [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html) from Lean's mathlib, so there is nothing bespoke to trust on the spec side.
 
-The theorem [`fibContract_correct`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L168) says that for every initial state, running `fibContract` halts, writes `Nat.fib n` (mod `2^256`) to memory slot `0`, and returns that 32-byte word, where `n` is the value read from calldata:
+The theorem [`fibContract_correct`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L184) says that for every initial state, running `fibContract` returns `Nat.fib n` (mod `2^256`), where `n` is the value read from calldata:
 
 ```lean
 theorem fibContract_correct (st0 : EvmState) :
     ∃ st, Run evm fibContract st0 [] st .halt ∧
-      st.memory = storeWord st0.memory 0
-        (BitVec.ofNat 256 (Nat.fib (wordFrom st0.env.calldata 0).toNat)) ∧
-      st.halted = some (.ret, readBytes st.memory 0 32)
+      st.halted = some (.ret,
+        wordBytes (BitVec.ofNat 256 (Nat.fib (wordFrom st0.env.calldata 0).toNat))) := by
 ```
 
 This is a "for every input" statement, not a test over a handful of values: the loop is proven correct against `Nat.fib` for all `n` at once. That is the kind of high level property yul-semantics lets us state and prove about a contract, before the compiler ever turns it into bytecode.
