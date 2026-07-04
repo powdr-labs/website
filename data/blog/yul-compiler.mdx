@@ -26,7 +26,7 @@ As is common in EVM implementations, we run evm-semantics against the [Ethereum 
 
 ## What Yul looks like in Lean
 
-Here is a complete Yul program written directly in Lean, using yul-semantics' embedded DSL `yul% { ... }` ([`FibExample.lean`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L24)). The program reads a number `n` from calldata and iteratively computes the nth Fibonacci number:
+Here is a complete Yul program written directly in Lean, using yul-semantics' embedded DSL `yul% { ... }` ([`FibExample.lean`](https://github.com/powdr-labs/yul-semantics/blob/f4e6187d684c0ebaee751750c5c368a4226abb73/YulSemantics/FibExample.lean#L24)). The program reads a number `n` from calldata and iteratively computes the nth Fibonacci number:
 
 ```lean
 def fibContract : Block EVM.Op := yul% {
@@ -45,7 +45,7 @@ def fibContract : Block EVM.Op := yul% {
 
 This is real Yul that happens to live inside Lean, which means we can state what the program is supposed to compute and prove it. The specification here is [`Nat.fib`](https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Nat/Fib/Basic.html) from Lean's mathlib, so there is nothing bespoke to trust on the spec side.
 
-The theorem [`fibContract_correct`](https://github.com/powdr-labs/yul-semantics/blob/main/YulSemantics/FibExample.lean#L184) says that for every initial state, running `fibContract` returns `Nat.fib n` (mod `2^256`), where `n` is the value read from calldata:
+The theorem [`fibContract_correct`](https://github.com/powdr-labs/yul-semantics/blob/f4e6187d684c0ebaee751750c5c368a4226abb73/YulSemantics/FibExample.lean#L184) says that for every initial state, running `fibContract` returns `Nat.fib n` (mod `2^256`), where `n` is the value read from calldata:
 
 ```lean
 theorem fibContract_correct (st0 : EvmState) :
@@ -60,7 +60,7 @@ The compiler must preserve these semantics when generating EVM bytecode, and tha
 
 ## The compiler correctness theorem
 
-The main theorem is [`compile_correct`](https://github.com/powdr-labs/yul-compiler/blob/main/YulEvmCompiler/Correctness.lean#L1580), which says the compiler does not lie about what your program does:
+The main theorem is [`compile_correct`](https://github.com/powdr-labs/yul-compiler/blob/28bcc31016f112830eafc7d2ccfb5b3f20adbb25/YulEvmCompiler/Correctness.lean#L1580), which says the compiler does not lie about what your program does:
 
 ```lean
 theorem compile_correct {prog : YulSemantics.Block Op} {is : List Instr}
