@@ -12,12 +12,6 @@ I was interested in a new paradigm for software development: Write the spec in a
 - **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects are things like memory operations -- things that actually change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
 - **Completeness**: For each satisfying assignment of the _input_ constraint system, there must be a satisfying assignment of the _output_ constraint system. This ensures that the prover can use the _output_ chip in all cases. It also prevents a trivial "optimizer": One that always returns a minimal unsatisfiable circuit.
 
-This is what this looks like in Lean:
-
-:::warning
-**TODO: Make this section in `Spec.lean` perfect & cite it here**
-:::
-
 ## Zero-reviewed, AI-generated code
 
 In this repository, the setup is the following:
@@ -27,21 +21,32 @@ In this repository, the setup is the following:
 - The core optimizer implementation is hidden in the [`Implementation` module](https://github.com/powdr-labs/leanr/tree/main/Leanr/Implementation). I barely looked at it and do not review changes to it.
 - A [Skill](https://github.com/powdr-labs/leanr/blob/main/.claude/skills/autoopt/SKILL.md) describes how to approach improving the optimizer.
 
-All that's left for us to do is to open up Claude and prompt: "Improve the optimizer".
+For example, this is the high-level property proven about our optimizer:
+
+```lean
+abbrev Optimizer (p : ℕ) := ConstraintSystem p → ConstraintSystem p × Derivations p
+
+/-- An optimizer is correct if, for every input constraint system, replacing it with the optimized
+    system is both sound and complete, and the optimizer respects the degree bound. -/
+def Optimizer.isCorrect (optimizer : Optimizer p) (busSemantics : BusSemantics p) : Prop :=
+  (∀ originalCS : ConstraintSystem p,
+    let (optimizedCS, derivations) := optimizer originalCS
+    (optimizedCS.isSoundReplacementOf originalCS busSemantics) ∧
+    (optimizedCS.isCompleteReplacementOf originalCS busSemantics derivations))
+  ∧ optimizerRespectsDegreeBound busSemantics optimizer
+```
+
+All that's left for us to do is to open up Claude and prompt: *"Improve the optimizer"*. It'll come back with a PR like [this](https://github.com/powdr-labs/leanr/pull/69#issuecomment-4917869843).
 
 ## The result: on par with powdr autoprecompiles + formally verified
 
-:::warning
 **TODO: Report results, link report**
-:::
 
 ## Integration into powdr autoprecompiles
 
 This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function, so we went ahead and replaced it.
 
-:::warning
 **TODO: Describe integration, nightly results?**
-:::
 
 ## Conclusion
 
