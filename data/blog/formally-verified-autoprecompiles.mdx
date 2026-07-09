@@ -4,9 +4,11 @@ date: '2026-07-09'
 summary: 'powdr autoprecompiles are now e2e formally verified, using Lean.'
 ---
 
-[leanr](https://github.com/powdr-labs/leanr) is a project we started experimenting with 9 months ago, trying to formally verify powdr's [autoprecompile's](https://powdr.org/blog/accelerating-ethereum-with-autoprecompiles) optimizer by rewriting it in Lean.
+We started [leanr](https://github.com/powdr-labs/leanr) 9 months ago to research the feasibility of formally verifying powdr [autoprecompiles](https://powdr.org/blog/accelerating-ethereum-with-autoprecompiles) optimizer by rewriting it in Lean. Back then this was a doable but complex and costly effort. We are now excited to share that the project is formally verified and integrated into the powdr autoprecompiles pipeline.
 
-We are now interested in a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that it adheres to the spec. The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for it to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
+---
+
+The effort was advanced dramatically by a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that it adheres to the spec. The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for it to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
 
 - **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects include memory and other operations that change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
 - **Completeness**: For each satisfying assignment of the _input_ constraint system, there must be a satisfying assignment of the _output_ constraint system. This ensures that the prover can use the _output_ chip in all cases. It also prevents a trivial "optimizer": One that always returns a minimal unsatisfiable circuit.
@@ -46,7 +48,7 @@ After the soundness and completeness specification is stable, development consis
 This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function.
 Using Rust FFI, we wrote a new crate [autoprecompiles-lean-ffi](https://github.com/powdr-labs/powdr/tree/claude/lean-optimizer-ffi/autoprecompiles-lean-ffi) that compiles `leanr` into a static library and exports the optimizer for usage in Rust.
 The new crate [integrates seamlessly](https://github.com/powdr-labs/powdr/pull/3784) with the `autoprecompiles` pipeline, passing the unit tests and generating e2e proofs with OpenVM and autoprecompiles!
-The formally verified optimizer can be enabled via a simple Rust feature and a runtime flag.
+
 This shows that we can make existing software safer module by module, proving equivalent code in Lean and replacing Rust modules/crates via FFI until the whole system is proved.
 
 **TODO: Describe integration, nightly results?**
