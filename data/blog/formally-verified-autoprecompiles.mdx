@@ -44,7 +44,11 @@ All that's left for us to do is to open up Claude and prompt: *"Improve the opti
 
 ## Integration into powdr autoprecompiles
 
-This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function, so we went ahead and replaced it.
+This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function.
+Using Rust FFI, we wrote a new crate [autoprecompiles-lean-ffi](https://github.com/powdr-labs/powdr/tree/claude/lean-optimizer-ffi/autoprecompiles-lean-ffi) that compiles `leanr` into a static library and exports the optimizer for usage in Rust.
+The new crate [integrates seamlessly](https://github.com/powdr-labs/powdr/pull/3784) with the `autoprecompiles` pipeline, passing the unit tests and generating e2e proofs with OpenVM and autoprecompiles!
+The formally verified optimizer can be enabled via a simple Rust feature and a runtime flag.
+This shows that we can make existing software safer module by module, proving equivalent code in Lean and replacing Rust modules/crates via FFI until the whole system is proved.
 
 **TODO: Describe integration, nightly results?**
 
