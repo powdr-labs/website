@@ -1,15 +1,14 @@
 ---
 title: 'Formally Verified Autoprecompiles'
-date: '2026-07-08'
+date: '2026-07-09'
 summary: 'powdr autoprecompiles are now e2e formally verified, using Lean.'
-authors: ['Georg Wiese']
 ---
 
-A week ago, I was looking for my first [Lean](https://lean-lang.org/) project. I turned to [leanr](https://github.com/powdr-labs/leanr), a project my colleague Christian Reitwiessner started 9 months ago to experiment with formally verifying powdr's [autoprecompile](https://powdr.org/blog/accelerating-ethereum-with-autoprecompiles) pipeline.
+[leanr](https://github.com/powdr-labs/leanr) is a project we started experimenting with 9 months ago, trying to formally verify powdr's [autoprecompile's](https://powdr.org/blog/accelerating-ethereum-with-autoprecompiles) optimizer by rewriting it in Lean.
 
-I was interested in a new paradigm for software development: Write the spec in a formal language, let AI write both the code and the proofs that it adheres to the spec. The core of the autoprecompile pipeline is a constraint system optimizer. It turns out not to be too hard to specify what it means for it to be correct: If you consider the _input_ and _output_ constraint system, we basically want:
+We are now interested in a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that it adheres to the spec. The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for it to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
 
-- **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects are things like memory operations -- things that actually change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
+- **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects include memory and other operations that change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
 - **Completeness**: For each satisfying assignment of the _input_ constraint system, there must be a satisfying assignment of the _output_ constraint system. This ensures that the prover can use the _output_ chip in all cases. It also prevents a trivial "optimizer": One that always returns a minimal unsatisfiable circuit.
 
 ## Zero-reviewed, AI-generated code
@@ -17,11 +16,11 @@ I was interested in a new paradigm for software development: Write the spec in a
 In this repository, the setup is the following:
 
 - There are roughly ~400 LoC of spec, see [this section of the README](https://github.com/powdr-labs/leanr#auditing-correctness). This code is thoroughly reviewed by multiple humans and agents. Agents are instructed not to change it unless explicitly asked.
-- There is some boilerplate to benchmark the system on [real-world inputs](https://github.com/powdr-labs/leanr/tree/main/OpenVmBenchmarks). For example, we're measuring optimizer effectiveness on the 100 costliest basic blocks on the [`openvm-eth`](https://github.com/powdr-labs/openvm-eth) guest program -- a program that verifies Ethereum blocks.
-- The core optimizer implementation is hidden in the [`Implementation` module](https://github.com/powdr-labs/leanr/tree/main/Leanr/Implementation). I barely looked at it and do not review changes to it.
+- The system is benchmarked on [real-world inputs](https://github.com/powdr-labs/leanr/tree/main/OpenVmBenchmarks). For example, we are measuring optimizer effectiveness on the 100 hottest basic blocks on the [`openvm-eth`](https://github.com/powdr-labs/openvm-eth) guest program which verifies Ethereum blocks.
+- The core optimizer implementation is hidden in the [`Implementation` module](https://github.com/powdr-labs/leanr/tree/main/Leanr/Implementation). We do not review changes to it.
 - A [Skill](https://github.com/powdr-labs/leanr/blob/main/.claude/skills/autoopt/SKILL.md) describes how to approach improving the optimizer.
 
-For example, this is the high-level property proven about our optimizer:
+For example, this is the high-level property that is proven about the optimizer:
 
 ```lean
 abbrev Optimizer (p : ℕ) := ConstraintSystem p → ConstraintSystem p × Derivations p
@@ -36,7 +35,7 @@ def Optimizer.isCorrect (optimizer : Optimizer p) (busSemantics : BusSemantics p
   ∧ optimizerRespectsDegreeBound busSemantics optimizer
 ```
 
-All that's left for us to do is to open up Claude and prompt: *"Improve the optimizer"*. It'll come back with a PR like [this](https://github.com/powdr-labs/leanr/pull/69#issuecomment-4917869843).
+After the soundness and completeness specification is stable, development consists of prompting AIs to: _"Improve the optimizer"_. They return with PRs like [this](https://github.com/powdr-labs/leanr/pull/69#issuecomment-4917869843).
 
 ## The result: on par with powdr autoprecompiles + formally verified
 
@@ -54,6 +53,6 @@ This shows that we can make existing software safer module by module, proving eq
 
 ## Conclusion
 
-What this report shows is that a new programming paradigm -- writing a formal spec, then letting AI handle everything else -- is completely practical today. It solves a key bottleneck in AI-driven software development: Reviews. With this approach, we can fully benefit from the speedups offered by AI writing the code without assuming that they are perfect.
+We showed that this new programming paradigm is practical today: Write a formal spec, let AI handle everything else. It solves a key bottleneck in AI-driven software development: Reviews. With this approach, we can fully benefit from the speedups offered by AI writing the code without assuming that they are perfect. Moreover, we get formal guarantees about our systems, which to this date has been considered either too costly or too complicated by most people.
 
-As for powdr autoprecompiles, we expect this to make it easier for us to adapt to changes in zkVM arithmetization. What if future zkVM are arithmetized over binary fields, and proven using variants of [Binius](https://github.com/binius-zk/binius64) or [Flock](https://github.com/succinctlabs/flock/blob/main/paper/flock-paper.pdf)? With a few changes to the spec and good benchmarks, we should be able to get something working very quickly.
+As for powdr autoprecompiles, we expect this to make it easier to adapt to changes in zkVM arithmetization. What if future zkVMs are arithmetized over binary fields, and proven using variants of [Binius](https://github.com/binius-zk/binius64) or [Flock](https://github.com/succinctlabs/flock/blob/main/paper/flock-paper.pdf)? With a few changes to the spec and real-world benchmarks, autoprecompiles should quickly be compatible.
