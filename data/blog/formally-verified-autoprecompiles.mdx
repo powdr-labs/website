@@ -53,6 +53,8 @@ This is how the Lean implementation stacks up as of today:
 
 These numbers show the effectiveness averaged over the 100 basic blocks. Variable effectiveness correlates most closely with end-to-end proving time. On this metric, the Lean implementation performs essentially the same. We are expecting more improvements in the next weeks.
 
+We do see that the *runtime* is still significantly slower. As the autoprecompile compiler only runs once at setup time, runtime is not an important metric to optimize for. Nevertheless, we are optimistic that a good prompt can do a lot here as well.
+
 ## Integration into powdr autoprecompiles
 
 This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function.
@@ -60,8 +62,6 @@ Using Rust FFI, we wrote a new crate [autoprecompiles-lean-ffi](https://github.c
 The new crate [integrates seamlessly](https://github.com/powdr-labs/powdr/pull/3784) with the `autoprecompiles` pipeline, passing the unit tests and generating e2e proofs with OpenVM and autoprecompiles!
 
 This shows that we can make existing software safer module by module, proving equivalent code in Lean and replacing Rust modules/crates via FFI until the whole system is proved.
-
-**TODO: Describe integration, nightly results?**
 
 ## Conclusion
 
