@@ -1,0 +1,72 @@
+---
+title: 'Formally Verified Autoprecompiles'
+date: '2026-07-09'
+summary: 'powdr autoprecompiles are now e2e formally verified, using Lean.'
+---
+
+The powdr [autoprecompiles'](https://powdr.org/blog/accelerating-ethereum-with-autoprecompiles) optimizer is now formally verified in Lean and integrated into the powdr autoprecompiles pipeline. Humans wrote and reviewed a formal spec of what the optimizer must guarantee. AI wrote all the code and all the proofs in [apc-optimizer](https://github.com/powdr-labs/apc-optimizer), and the Lean kernel guarantees that the implementation adheres to the spec. This means no human ever needs to read the implementation. The result matches the effectiveness of our hand-written Rust optimizer.
+
+---
+
+When we first scoped this effort, it looked doable but too complex and costly to justify. What changed is a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that show it adheres to the spec. Using this new paradigm the progress in `apc-optimizer` was achieved in **one week of work by a single engineer** (plus a few days of human review).
+
+The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for the optimizer to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
+
+- **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects include memory and other operations that change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
+- **Completeness**: For each satisfying assignment of the _input_ constraint system, there must be a satisfying assignment of the _output_ constraint system. This ensures that the prover can use the _output_ chip in all cases. It also prevents a trivial "optimizer": One that always returns a minimal unsatisfiable circuit.
+
+Here is what this looks like in Lean, taken from our [`Spec.lean`](https://github.com/powdr-labs/apc-optimizer/blob/main/Leanr/Spec.lean):
+
+```lean
+abbrev Optimizer (p : ℕ) := ConstraintSystem p → ConstraintSystem p × Derivations p
+
+/-- An optimizer is correct if, for every input constraint system, replacing it with the optimized
+    system is both sound and complete, and the optimizer respects the degree bound. -/
+def Optimizer.isCorrect (optimizer : Optimizer p) (busSemantics : BusSemantics p) : Prop :=
+  (∀ originalCS : ConstraintSystem p,
+    let (optimizedCS, derivations) := optimizer originalCS
+    (optimizedCS.isSoundReplacementOf originalCS busSemantics) ∧
+    (optimizedCS.isCompleteReplacementOf originalCS busSemantics derivations))
+  ∧ optimizerRespectsDegreeBound busSemantics optimizer
+```
+
+## Zero-reviewed, AI-generated code
+
+In this repository, the setup is the following:
+
+- There are ~500 LoC of spec, see [this section of the README](https://github.com/powdr-labs/apc-optimizer#auditing-correctness). This code is thoroughly reviewed by multiple humans and agents. Agents are instructed not to change it unless explicitly asked.
+- The system is benchmarked on [real-world inputs](https://github.com/powdr-labs/apc-optimizer/tree/main/OpenVmBenchmarks), described in the results section below.
+- The core optimizer implementation is hidden in the [`Implementation` module](https://github.com/powdr-labs/apc-optimizer/tree/main/Leanr/Implementation). We do not review changes to it, and we do not need to: CI type-checks every proof against the frozen spec and rejects `sorry` and new axioms, so an implementation that breaks soundness or completeness cannot merge.
+- A [Skill](https://github.com/powdr-labs/apc-optimizer/blob/main/.claude/skills/autoopt/SKILL.md) describes how to approach improving the optimizer.
+
+In the end, humans reviewed ~500 lines of spec, while the implementation and its proofs are 10,000 lines of Lean that no human ever read. With this framework in place, development of the optimizer consists of prompting AIs to improve it. They return with PRs like [this](https://github.com/powdr-labs/apc-optimizer/pull/69#issuecomment-4917869843).
+
+## The result: on par with powdr autoprecompiles, formally verified
+
+To compare to the existing Rust implementation, we measure different _effectiveness_ scores, each measuring the factor by which we can reduce the constraint system's variables, bus interactions, and algebraic constraints.
+
+This is how the Lean implementation stacks up as of today:
+
+| Effectiveness            | Rust implementation | Lean implementation |
+| ------------------------ | ------------------- | ------------------- |
+| Variable effectiveness   | 4.092x              | 4.082x              |
+| Bus effectiveness        | 3.480x              | 2.922x              |
+| Constraint effectiveness | 5.853x              | 8.801x              |
+
+These numbers show the effectiveness averaged over the 100 hottest RISC-V basic blocks in runs of [openvm-eth](https://github.com/powdr-labs/openvm-eth), a stateless Ethereum block verifier. Variable effectiveness correlates most closely with end-to-end proving time. On this metric, autoprecompiles optimized by the Lean implementation perform essentially the same! We are expecting more improvements in the next weeks.
+
+We do see that the _runtime_ is still significantly slower. As the autoprecompiles compiler only runs once at setup time, runtime is not an important metric to optimize for. Nevertheless, we are optimistic that this is simple to improve.
+
+## Integration into powdr autoprecompiles
+
+This project is designed to be a drop-in replacement for the [`powdr_autoprecompiles::optimizer::optimize`](https://github.com/powdr-labs/powdr/blob/5395a66442c82abc3c095d758f170773c4b5857d/autoprecompiles/src/optimizer.rs#L31-L41) function.
+Using Rust FFI, we wrote a new crate [autoprecompiles-lean-ffi](https://github.com/powdr-labs/powdr/tree/b07230275ed781220628603a04f0b99d4fbe073b/autoprecompiles-lean-ffi) that compiles `apc-optimizer` into a static library and exports the optimizer for usage in Rust.
+The new crate [integrates seamlessly](https://github.com/powdr-labs/powdr/pull/3784) with the `autoprecompiles` pipeline, passing the unit tests and generating e2e proofs with OpenVM and autoprecompiles!
+
+This shows that we can make existing software safer module by module, proving equivalent code in Lean and replacing Rust modules/crates via FFI until the whole system is proved.
+
+## Conclusion
+
+We showed that a new programming paradigm is practical today: Write a formal spec, let AI handle everything else. It solves a key bottleneck in AI-driven software development: Reviews. With this approach, we can fully benefit from the speedups offered by AI writing the code without assuming the AI is perfect. Moreover, we get formal guarantees about our systems, which to date has been considered either too costly or too complicated by most people.
+
+As for powdr autoprecompiles, we expect this to make it easier to adapt to changes in zkVM arithmetization. What if future zkVMs are arithmetized over binary fields, and proven using variants of [Binius](https://github.com/binius-zk/binius64) or [Flock](https://github.com/succinctlabs/flock/blob/main/paper/flock-paper.pdf)? With a few changes to the spec and real-world benchmarks, autoprecompiles should quickly be compatible.
