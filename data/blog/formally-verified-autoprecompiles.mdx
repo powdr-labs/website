@@ -39,9 +39,19 @@ In this repository, the setup is the following:
 
 After the soundness and completeness specification is stable, development consists of prompting AIs to: _"Improve the optimizer"_. They return with PRs like [this](https://github.com/powdr-labs/leanr/pull/69#issuecomment-4917869843).
 
-## The result: on par with powdr autoprecompiles + formally verified
+## The result: on par with powdr autoprecompiles, formally verified
 
-**TODO: Report results, link report**
+To compare to the existing Rust implementation, we measure different *effectiveness* scores, which is the factor by which we can reduce the constraint system's variables, bus interactions, or algebraic constraints.
+
+This is how the Lean implementation stacks up as of today:
+
+| Effectiveness | Rust implementation | Lean implementation |
+|---|---|---|
+| Variable effectiveness | 4.092x | 4.082x |
+| Bus effectiveness | 3.480x | 2.922x |
+| Constraint effectiveness | 5.853x | 8.801x |
+
+These numbers show the effectiveness averaged over the 100 basic blocks. Variable effectiveness correlates most closely with end-to-end proving time. On this metric, the Lean implementation performs essentially the same. We are expecting more improvements in the next weeks.
 
 ## Integration into powdr autoprecompiles
 
