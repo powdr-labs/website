@@ -8,7 +8,9 @@ We started [apc-optimizer](https://github.com/powdr-labs/apc-optimizer) 9 months
 
 ---
 
-The effort was advanced dramatically by a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that show it adheres to the spec. The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for it to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
+The effort was advanced dramatically by a new paradigm for software development: Write the spec in a formal language, and let AI write both the code and the proofs that show it adheres to the spec. Using this new paradigm the progress in `apc-optimizer` was achieved in **one week of work by a single engineer** (plus a few days of human reviewers).
+
+The core of the autoprecompiles pipeline is a constraint system optimizer. It is actually simple to specify what it means for it to be correct and safe: If you consider the _input_ and _output_ constraint system, we basically want:
 
 - **Soundness**: For each satisfying assignment of the _output_ constraint system, there must be a satisfying assignment of the _input_ constraint system _with the same side effects_. Side effects include memory and other operations that change the state of the zkVM. Under the assumption that the _input_ constraint system enforces correct state transitions, this property ensures that the optimized one does as well.
 - **Completeness**: For each satisfying assignment of the _input_ constraint system, there must be a satisfying assignment of the _output_ constraint system. This ensures that the prover can use the _output_ chip in all cases. It also prevents a trivial "optimizer": One that always returns a minimal unsatisfiable circuit.
@@ -41,19 +43,19 @@ As the repository is designed to have a minimal amount of code that needs human 
 
 ## The result: on par with powdr autoprecompiles, formally verified
 
-To compare to the existing Rust implementation, we measure different *effectiveness* scores, which is the factor by which we can reduce the constraint system's variables, bus interactions, or algebraic constraints.
+To compare to the existing Rust implementation, we measure different _effectiveness_ scores, which is the factor by which we can reduce the constraint system's variables, bus interactions, and algebraic constraints.
 
 This is how the Lean implementation stacks up as of today:
 
-| Effectiveness | Rust implementation | Lean implementation |
-|---|---|---|
-| Variable effectiveness | 4.092x | 4.082x |
-| Bus effectiveness | 3.480x | 2.922x |
-| Constraint effectiveness | 5.853x | 8.801x |
+| Effectiveness            | Rust implementation | Lean implementation |
+| ------------------------ | ------------------- | ------------------- |
+| Variable effectiveness   | 4.092x              | 4.082x              |
+| Bus effectiveness        | 3.480x              | 2.922x              |
+| Constraint effectiveness | 5.853x              | 8.801x              |
 
-These numbers show the effectiveness averaged over the 100 basic blocks. Variable effectiveness correlates most closely with end-to-end proving time. On this metric, the Lean implementation performs essentially the same. We are expecting more improvements in the next weeks.
+These numbers show the effectiveness averaged over the 100 hottest RISC-V basic blocks in runs of [openvm-eth](https://github.com/powdr-labs/openvm-eth), a stateless Ethereum block verifier. Variable effectiveness correlates most closely with end-to-end proving time. On this metric, autoprecompiles optimized by the Lean implementation perform essentially the same! We are expecting more improvements in the next weeks.
 
-We do see that the *runtime* is still significantly slower. As the autoprecompile compiler only runs once at setup time, runtime is not an important metric to optimize for. Nevertheless, we are optimistic that a good prompt can do a lot here as well.
+We do see that the _runtime_ is still significantly slower. As the autoprecompiles compiler only runs once at setup time, runtime is not an important metric to optimize for. Nevertheless, we are optimistic that this is simple to improve.
 
 ## Integration into powdr autoprecompiles
 
